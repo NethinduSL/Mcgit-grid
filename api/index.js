@@ -57,7 +57,8 @@ async function update(name, fn) {
 
 const SECRET = TOKEN ? crypto.createHash('sha256').update('mcg-it-grid:' + TOKEN).digest('hex') : '';
 const fail = (m, c = 400) => { throw Object.assign(new Error(m), { code: c }); };
-const pub = u => ({ id: u.id, email: u.email, name: u.name, grade: u.grade, role: u.role });
+const pub = u => ({ id: u.id, email: u.email || '', name: u.name, grade: u.grade, no: u.no || '', role: u.role });
+const nk = v => String(v ?? '').slice(0, 120).trim().toLowerCase().replace(/\s+/g, ' ');
 const sign = u => jwt.sign({ id: u.id, role: u.role }, SECRET, { expiresIn: '7d' });
 const str = (v, n) => String(v ?? '').slice(0, n);
 const PUBLIC = ['register', 'login'];
@@ -77,24 +78,35 @@ const sees = (h, g) => {
 
 const A = {
   async register(b) {
-    const email = str(b.email, 120).trim().toLowerCase();
-    if (!email.includes('@') || str(b.password, 100).length < 6) fail('Valid email and password (6+ chars) required');
-    const hash = await bcrypt.hash(b.password, 10);
+    const name = str(b.name, 80).trim().replace(/\s+/g, ' ');
+    const password = str(b.password, 100);
+    if (name.length < 2) fail('Name is required');
+    if (password.length < 6) fail('Password must be 6+ characters');
     const role = setting('TEACHER_CODE') && b.code === setting('TEACHER_CODE') ? 'teacher' : 'student';
-    const u = await update('users', users => {
-      if (users.some(x => x.email === email)) fail('Email already registered');
-      const u = { id: crypto.randomUUID(), email, hash, name: str(b.name, 80), grade: str(b.grade, 20), role, created: new Date().toISOString() };
+    const grade = str(b.grade, 20), no = str(b.no, 6).trim();
+    if (role === 'student') {
+      if (!grade) fail('Select your grade and section');
+      if (!/^\d{1,3}$/.test(no)) fail('Enter your class number');
+    }
+    const hash = await bcrypt.hash(password, 10);
+    const u = await update('users', async users => {
+      for (const x of users) {
+        if (role === 'student' && x.role === 'student' && gradeKey(x.grade) === gradeKey(grade) && String(x.no || '') === no) fail('This class number is already registered in that class');
+        if (nk(x.name) === nk(name) && await bcrypt.compare(password, x.hash)) fail('Someone with this name already uses this password. Please choose a different password');
+      }
+      const u = { id: crypto.randomUUID(), email: str(b.email, 120).trim().toLowerCase(), name, hash, grade: role === 'student' ? grade : '', no: role === 'student' ? no : '', role, created: new Date().toISOString() };
       users.push(u); return u;
     });
     return { token: sign(u), user: pub(u) };
   },
   async login(b) {
-    const email = str(b.email, 120).trim().toLowerCase();
-    if (email === TEMP.email && str(b.password, 100) === 'nt') return { token: sign(TEMP), user: pub(TEMP) };
+    const id = nk(b.name ?? b.email), pw = str(b.password, 100);
+    if (id === TEMP.email && pw === 'nt') return { token: sign(TEMP), user: pub(TEMP) };
     const { data } = await read('users');
-    const u = data.find(x => x.email === email);
-    if (!u || !(await bcrypt.compare(str(b.password, 100), u.hash))) fail('Wrong email or password', 401);
-    return { token: sign(u), user: pub(u) };
+    for (const u of data.filter(x => nk(x.name) === id || (x.email && x.email === id))) {
+      if (await bcrypt.compare(pw, u.hash)) return { token: sign(u), user: pub(u) };
+    }
+    fail('Wrong name or password', 401);
   },
   async me(b, me) {
     if (isTemp(me)) return { user: pub(TEMP) };
@@ -103,10 +115,10 @@ const A = {
     return { user: pub(u) };
   },
   async updateProfile(b, me) {
-    if (isTemp(me)) return { user: { ...pub(TEMP), name: str(b.name, 80), grade: str(b.grade, 20) } };
+    if (isTemp(me)) return { user: { ...pub(TEMP), name: str(b.name, 80), grade: str(b.grade, 20), no: str(b.no, 6) } };
     return { user: await update('users', users => {
       const u = users.find(x => x.id === me.id); if (!u) fail('Account not found', 401);
-      u.name = str(b.name, 80); u.grade = str(b.grade, 20); return pub(u);
+      u.name = str(b.name, 80).trim().replace(/\s+/g, ' ') || u.name; u.grade = str(b.grade, 20); u.no = str(b.no, 6).trim(); return pub(u);
     }) };
   },
   async changePassword(b, me) {
@@ -176,7 +188,7 @@ const A = {
   },
   async students() {
     const [{ data: users }, { data: subs }] = await Promise.all([read('users'), read('submissions')]);
-    return { students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, email: u.email, grade: u.grade, submitted: subs.filter(s => s.studentId === u.id).length })) };
+    return { students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, no: u.no || '', grade: u.grade, submitted: subs.filter(s => s.studentId === u.id).length })) };
   },
   async studentWork(b) {
     const [{ data: hws }, { data: subs }, { data: users }] = await Promise.all([read('homeworks'), read('submissions'), read('users')]);
@@ -188,7 +200,7 @@ const A = {
     const [{ data: hws }, { data: subs }, { data: users }] = await Promise.all([read('homeworks'), read('submissions'), read('users')]);
     return {
       homeworks: hws.map(h => ({ id: h.id, title: h.title, due: h.due, total: h.total ?? null, targets: h.targets || [] })),
-      students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, email: u.email, grade: u.grade })),
+      students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, no: u.no || '', grade: u.grade })),
       submissions: subs.map(s => ({ homeworkId: s.homeworkId, studentId: s.studentId, marks: s.marks ?? null, submittedAt: s.submittedAt }))
     };
   },
