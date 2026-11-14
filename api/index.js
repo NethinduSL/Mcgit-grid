@@ -1,7 +1,7 @@
 // ================= SETTINGS (edit here) =================
 // Values set in Vercel Environment Variables (if any) override these.
 const CONFIG = {
-  GITHUB_TOKEN: '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',                  // paste your NEW GitHub token here (github_pat_...)
+  GITHUB_TOKEN: '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',                  // paste your NEW GitHub token here (github_pat_...)
   GITHUB_REPO: 'NethinduSL/Mcgitdb', // owner/repo of the private DATA repo
   JWT_SECRET: 'effect give @p minecraft:night_vision 999 1 true',                    // any long random text, 40+ characters
   TEACHER_CODE: 'admin123'                   // secret code teachers type when registering
