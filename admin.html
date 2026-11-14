@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="theme-color" content="#0b0b0c"><title>Admin · MCG IT Grid</title></head>
+<body>
+<div class="nav" id="nav"></div>
+<div class="wrap">
+  <h1 class="title"><i class="fa-solid fa-chalkboard-user"></i> Teacher Admin</h1><p class="sub">Create homeworks, view submissions and give marks</p>
+  <div class="card"><h2><i class="fa-solid fa-plus"></i> New homework</h2>
+    <div class="row"><div class="field"><label>Title</label><input id="t"></div>
+    <div class="field"><label>Due date</label><input id="due" type="date"></div></div>
+    <div class="field"><label>Description</label><textarea id="d" rows="3"></textarea></div>
+    <button class="btn" onclick="add()"><i class="fa-solid fa-plus"></i> Create homework</button></div>
+  <h2 style="font-size:16px"><i class="fa-solid fa-list-check"></i> All homeworks</h2>
+  <div id="list"><div class="empty"><i class="fa-solid fa-spinner fa-spin"></i>Loading...</div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+<script>
+if (guard('teacher')) { renderNav('admin'); load(); }
+async function load() {
+  try {
+    const { homeworks } = await api('homeworks');
+    $('list').innerHTML = homeworks.map(h => `<div class="card hw"><div class="ic"><i class="fa-solid fa-laptop-code"></i></div><div class="body">
+      <h3>${esc(h.title)}</h3><div class="meta"><span><i class="fa-regular fa-calendar"></i> Due ${fmt(h.due)}</span></div>
+      <p>${esc(h.description)}</p>
+      <button class="btn sm" onclick="subs('${h.id}')"><i class="fa-solid fa-inbox"></i> Submissions</button>
+      <button class="btn sm danger" onclick="del('${h.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+      <div id="s-${h.id}"></div></div></div>`).join('') || '<div class="empty"><i class="fa-regular fa-folder-open"></i>No homeworks yet</div>';
+  } catch (e) { $('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
+}
+async function add() {
+  try { await api('createHomework', { title: val('t'), description: val('d'), due: val('due') });
+    ['t', 'd', 'due'].forEach(i => $(i).value = ''); toast('Homework created ✔'); load(); }
+  catch (e) { toast(e.message, true); }
+}
+async function del(id) { if (confirm('Delete this homework?')) { await api('deleteHomework', { id }); toast('Deleted'); load(); } }
+async function subs(id) {
+  const box = $('s-' + id);
+  try {
+    const { submissions } = await api('submissions', { homeworkId: id });
+    box.innerHTML = '<div style="margin:10px 0 4px;font-weight:600">' + submissions.length + ' submission(s)</div>' + submissions.map(s => `<div class="sublist">
+      <div class="who"><i class="fa-solid fa-user-graduate"></i> ${esc(s.name || 'Unknown')} <span class="badge">${esc(s.grade)}</span></div>
+      <p style="margin:4px 0">${esc(s.answer)}</p>
+      ${/^https?:\/\//i.test(s.link || '') ? `<a href="${esc(s.link)}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> Open link</a>` : ''}
+      <div class="meta" style="margin:6px 0">Submitted ${fmt(s.submittedAt)}</div>
+      <div class="grade-row"><input id="m-${s.id}" type="number" placeholder="Marks" value="${s.marks ?? ''}">
+        <input id="f-${s.id}" placeholder="Feedback" value="${esc(s.feedback)}">
+        <button class="btn sm dark" onclick="grade('${s.id}')"><i class="fa-solid fa-check"></i> Save</button></div></div>`).join('');
+  } catch (e) { toast(e.message, true); }
+}
+async function grade(id) {
+  try { await api('grade', { id, marks: $('m-' + id).value, feedback: $('f-' + id).value }); toast('Marks saved ✔'); }
+  catch (e) { toast(e.message, true); }
+}
+</script></body></html>

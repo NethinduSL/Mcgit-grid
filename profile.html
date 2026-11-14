@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="theme-color" content="#0b0b0c"><title>Profile · MCG IT Grid</title></head>
+<body>
+<div class="nav" id="nav"></div>
+<div class="wrap" style="max-width:680px">
+  <h1 class="title"><i class="fa-solid fa-user"></i> My Profile</h1><p class="sub">Manage your account</p>
+  <div class="card phead" id="head"></div>
+  <div class="card"><h2><i class="fa-solid fa-id-card"></i> Details</h2>
+    <div class="field"><label>Email</label><input id="email" disabled></div>
+    <div class="row"><div class="field"><label>Full name</label><input id="name"></div>
+    <div class="field"><label>Grade / Class</label><input id="grade"></div></div>
+    <button class="btn" onclick="save()"><i class="fa-solid fa-floppy-disk"></i> Save changes</button></div>
+  <div class="card"><h2><i class="fa-solid fa-lock"></i> Change password</h2>
+    <div class="field"><label>New password (6+ characters)</label><input id="pw" type="password"></div>
+    <button class="btn dark" onclick="pass()"><i class="fa-solid fa-key"></i> Update password</button></div>
+  <button class="btn danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/app.js"></script>
+<script>
+if (guard()) { renderNav('profile'); fill(); }
+function fill() {
+  $('head').innerHTML = `<div class="avatar">${esc(initials(me.name))}</div><div><h2>${esc(me.name)}</h2>
+    <span class="badge y"><i class="fa-solid ${me.role === 'teacher' ? 'fa-chalkboard-user' : 'fa-user-graduate'}"></i> ${me.role}</span>
+    ${me.grade ? `<span class="badge">${esc(me.grade)}</span>` : ''}</div>`;
+  $('email').value = me.email; $('name').value = me.name; $('grade').value = me.grade;
+}
+async function save() {
+  try { saveSession(await api('updateProfile', { name: val('name'), grade: val('grade') })); fill(); toast('Profile saved ✔'); }
+  catch (e) { toast(e.message, true); }
+}
+async function pass() {
+  try { await api('changePassword', { password: val('pw') }); $('pw').value = ''; toast('Password updated ✔'); }
+  catch (e) { toast(e.message, true); }
+}
+</script></body></html>

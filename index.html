@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style.css"><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Login · MCG IT Grid</title></head>
+<body>
+<div class="auth"><div class="authbox">
+  <div class="left">
+    <span class="glogo lg"><b></b><b></b><b></b><b></b></span>
+    <h1>MCG <em>IT Grid</em></h1>
+    <p>Your ICT learning space. Get homeworks, submit your work and track your marks in one place.</p>
+    <ul>
+      <li><i class="fa-solid fa-book-open"></i> View homeworks</li>
+      <li><i class="fa-solid fa-paper-plane"></i> Submit online</li>
+      <li><i class="fa-solid fa-star"></i> See marks and feedback</li>
+    </ul>
+  </div>
+  <div class="right">
+    <form onsubmit="go(event)">
+      <h2 id="h">Welcome back</h2>
+      <div style="color:var(--g)">Please enter your details</div>
+      <div class="tabs"><button type="button" id="t1" class="on" onclick="mode(false)">Login</button><button type="button" id="t2" onclick="mode(true)">Register</button></div>
+      <div id="regf" hidden>
+        <div class="field"><label>Full name</label><input id="name" autocomplete="name"></div>
+        <div class="field"><label>Grade / Class</label><input id="grade" placeholder="e.g. 11-A"></div>
+      </div>
+      <div class="field"><label>Email</label><input id="email" type="email" required autocomplete="email"></div>
+      <div class="field"><label>Password</label><input id="pw" type="password" required minlength="6" autocomplete="current-password"></div>
+      <div class="field" id="codef" hidden><label>Teacher code <small style="font-weight:400;opacity:.7">(teachers only)</small></label><input id="code" autocomplete="off"></div>
+      <div class="err" id="err"></div>
+      <button class="btn" style="width:100%;justify-content:center" id="go"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+    </form>
+  </div>
+</div></div>
+<div class="foot"><b>MCG IT Grid</b> · ICT Learning Management System</div>
+<script src="js/app.js"></script>
+<script>
+if (token && me) location.href = home();
+let reg = false;
+function mode(r) {
+  reg = r; $('regf').hidden = !r; $('codef').hidden = !r;
+  $('t1').className = r ? '' : 'on'; $('t2').className = r ? 'on' : '';
+  $('h').textContent = r ? 'Create account' : 'Welcome back';
+  $('go').innerHTML = r ? '<i class="fa-solid fa-user-plus"></i> Create account' : '<i class="fa-solid fa-right-to-bracket"></i> Login';
+  $('pw').autocomplete = r ? 'new-password' : 'current-password';
+  $('err').textContent = '';
+}
+async function go(e) {
+  e.preventDefault(); $('err').textContent = ''; $('go').disabled = true;
+  try {
+    const j = reg
+      ? await api('register', { email: val('email'), password: val('pw'), name: val('name'), grade: val('grade'), code: val('code') })
+      : await api('login', { email: val('email'), password: val('pw') });
+    saveSession(j); location.href = home();
+  } catch (x) { $('err').textContent = x.message; $('go').disabled = false; }
+}
+</script></body></html>
