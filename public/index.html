@@ -5,7 +5,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* MCG IT Grid - glassmorphism theme */
+
 :root{--y:#ffc900;--k:#0b0b0c;--g:rgba(255,255,255,.62);--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);--line:rgba(255,255,255,.16);--red:#ff7b86;--green:#5be08f}
 *{box-sizing:border-box}
 html{color-scheme:dark}
@@ -22,19 +22,16 @@ a{color:var(--y)}
 ::selection{background:var(--y);color:#000}
 ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#ffffff30;border-radius:10px}
 
-/* glass surface */
 .card,.stat,.sublist,.authbox,.nav{-webkit-backdrop-filter:blur(18px) saturate(150%);backdrop-filter:blur(18px) saturate(150%)}
 .card,.stat{background:var(--glass);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.14);animation:up .45s ease both}
 @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.card,.stat,.sublist,.nav,.authbox{background:rgba(28,28,30,.94)}}
 
-/* logo */
 .glogo{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;width:36px;height:36px;padding:6px;border-radius:11px;background:var(--y);flex:none;box-shadow:0 0 18px rgba(255,201,0,.45)}
 .glogo b{background:#111;border-radius:2px}.glogo b:nth-child(2),.glogo b:nth-child(3){opacity:.3}
 .glogo.lg{width:68px;height:68px;padding:12px;gap:5px;border-radius:20px}
 .glogo.lg b{border-radius:4px}
 
-/* nav */
 .nav{background:rgba(12,12,13,.6);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(255,201,0,.35)}
 .nav .in{max-width:1000px;margin:auto;display:flex;align-items:center;gap:6px;padding:10px 16px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;margin-right:auto;font-size:16px;letter-spacing:.2px}
@@ -43,7 +40,6 @@ a{color:var(--y)}
 .nav .link:hover{background:var(--glass2);border-color:var(--line)}
 .nav .link.on{background:var(--y);color:#111;font-weight:600;box-shadow:0 0 18px rgba(255,201,0,.35)}
 
-/* layout */
 .wrap{max-width:1000px;margin:26px auto;padding:0 16px;position:relative;z-index:1}
 .title{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:24px;font-weight:700}
 .title i{color:var(--y)}
@@ -56,7 +52,6 @@ a{color:var(--y)}
 .stat i{width:44px;height:44px;border-radius:13px;background:var(--y);color:#111;display:grid;place-items:center;font-size:18px;box-shadow:0 0 16px rgba(255,201,0,.35)}
 .stat b{font-size:24px;display:block;line-height:1.1}.stat span{font-size:12px;color:var(--g)}
 
-/* forms */
 label{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);display:block;margin-bottom:5px}
 .field{margin-bottom:12px}
 input,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;font:inherit;color:#fff;background:rgba(255,255,255,.06);transition:.2s}
@@ -73,7 +68,6 @@ input:disabled{opacity:.55;cursor:not-allowed}
 .btn.danger:hover{background:rgba(255,90,100,.25);box-shadow:none}
 .btn.sm{padding:7px 13px;font-size:12px}
 
-/* homework */
 .hw{display:flex;gap:14px}
 .hw .ic{flex:none;width:46px;height:46px;border-radius:14px;background:rgba(255,201,0,.14);color:var(--y);border:1px solid rgba(255,201,0,.38);display:grid;place-items:center;font-size:18px}
 .hw .body{flex:1;min-width:0}
@@ -92,18 +86,15 @@ input:disabled{opacity:.55;cursor:not-allowed}
 .grade-row{display:grid;grid-template-columns:100px 1fr auto;gap:8px;align-items:center}
 .empty{text-align:center;color:var(--g);padding:34px}.empty i{font-size:34px;color:rgba(255,255,255,.25);display:block;margin-bottom:8px}
 
-/* profile */
 .avatar{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#ffe066,var(--y) 55%,#ff9f00);color:#111;display:grid;place-items:center;font-size:30px;font-weight:700;border:3px solid rgba(255,255,255,.35);box-shadow:0 0 28px rgba(255,201,0,.4)}
 .phead{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .phead h2{margin:0 0 6px;font-size:20px;display:block}
 
-/* toast + footer */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:rgba(15,15,16,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;padding:12px 18px;border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--y);z-index:50;font-size:13px;display:none;max-width:90vw}
 .toast.bad{border-left-color:var(--red)}
 .foot{text-align:center;color:var(--g);font-size:12px;padding:10px 16px 30px;position:relative;z-index:1}
 .foot b{color:var(--y);font-weight:600}
 
-/* auth */
 .auth{min-height:100vh;display:grid;place-items:center;padding:20px;position:relative;z-index:1}
 .authbox{display:grid;grid-template-columns:1.05fr 1fr;width:100%;max-width:940px;border-radius:28px;overflow:hidden;background:var(--glass);border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.16);animation:up .55s ease both}
 .authbox .left{padding:48px 40px;background:linear-gradient(160deg,rgba(255,201,0,.2),rgba(255,201,0,.02) 60%);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
@@ -148,8 +139,8 @@ input:disabled{opacity:.55;cursor:not-allowed}
         <div class="field"><label>Full name</label><input id="name" autocomplete="name"></div>
         <div class="field"><label>Grade / Class</label><input id="grade" placeholder="e.g. 11-A"></div>
       </div>
-      <div class="field"><label>Email</label><input id="email" type="email" required autocomplete="email"></div>
-      <div class="field"><label>Password</label><input id="pw" type="password" required minlength="6" autocomplete="current-password"></div>
+      <div class="field"><label>Email</label><input id="email" type="text" required autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+      <div class="field"><label>Password</label><input id="pw" type="password" required autocomplete="current-password"></div>
       <div class="field" id="codef" hidden><label>Teacher code <small style="font-weight:400;opacity:.7">(teachers only)</small></label><input id="code" autocomplete="off"></div>
       <div class="err" id="err"></div>
       <button class="btn" style="width:100%;justify-content:center" id="go"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
@@ -185,7 +176,6 @@ function saveSession(j) {
 function home() { return me && me.role === 'teacher' ? 'admin.html' : 'home.html'; }
 function logout() { localStorage.removeItem('lms_token'); localStorage.removeItem('lms_user'); location.href = 'index.html'; }
 
-// call at top of every protected page; role = 'student' | 'teacher' | undefined
 function guard(role) {
   if (!token || !me) { location.href = 'index.html'; return false; }
   if (role && me.role !== role) { location.href = home(); return false; }
