@@ -1,5 +1,11 @@
 {
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "npm install --omit=dev",
   "outputDirectory": "public",
+  "functions": {
+    "api/index.js": { "maxDuration": 15 }
+  },
   "headers": [
     {
       "source": "/(.*)",
