@@ -1,8 +1,4 @@
-const CONFIG = {
-  GITHUB_TOKEN: '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',
-  GITHUB_REPO: 'NethinduSL/Mcgitdb',
-  TEACHER_CODE: 'admin'
-};
+const CONFIG = { GITHUB_REPO: 'NethinduSL/Mcgitdb' };
 const clean = v => String(v == null ? '' : v).trim().replace(/^["']+|["']+$/g, '').trim();
 const setting = k => clean(process.env[k]) || clean(CONFIG[k]);
 
