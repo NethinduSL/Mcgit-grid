@@ -1,11 +1,22 @@
+// ================= SETTINGS (edit here) =================
+// Values set in Vercel Environment Variables (if any) override these.
+const CONFIG = {
+  GITHUB_TOKEN: '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',                  // paste your NEW GitHub token here (github_pat_...)
+  GITHUB_REPO: 'NethinduSL/Mcgitdb', // owner/repo of the private DATA repo
+  JWT_SECRET: 'effect give @p minecraft:night_vision 999 1 true',                    // any long random text, 40+ characters
+  TEACHER_CODE: 'admin123'                   // secret code teachers type when registering
+};
+const setting = k => process.env[k] || CONFIG[k] || '';
+// ========================================================
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 // ---------- GitHub JSON database ----------
 // GitHub repo as a JSON database. Each collection = data/<name>.json in a PRIVATE data repo.
-const REPO = process.env.GITHUB_REPO;      // e.g. "nethindu/lms-data"
-const TOKEN = process.env.GITHUB_TOKEN;    // fine-grained PAT, Contents: read/write, only that repo
+const REPO = setting('GITHUB_REPO');      // e.g. "nethindu/lms-data"
+const TOKEN = setting('GITHUB_TOKEN');    // fine-grained PAT, Contents: read/write, only that repo
 const H = {
   Authorization: `Bearer ${TOKEN}`,
   Accept: 'application/vnd.github+json',
@@ -55,7 +66,7 @@ async function update(name, fn) {
 // ---------- API ----------
 
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = setting('JWT_SECRET');
 const fail = (m, c = 400) => { throw Object.assign(new Error(m), { code: c }); };
 const pub = u => ({ id: u.id, email: u.email, name: u.name, grade: u.grade, role: u.role });
 const sign = u => jwt.sign({ id: u.id, role: u.role }, SECRET, { expiresIn: '7d' });
@@ -68,7 +79,7 @@ const A = {
     const email = str(b.email, 120).trim().toLowerCase();
     if (!email.includes('@') || str(b.password, 100).length < 6) fail('Valid email and password (6+ chars) required');
     const hash = await bcrypt.hash(b.password, 10);
-    const role = process.env.TEACHER_CODE && b.code === process.env.TEACHER_CODE ? 'teacher' : 'student';
+    const role = setting('TEACHER_CODE') && b.code === setting('TEACHER_CODE') ? 'teacher' : 'student';
     const u = await update('users', users => {
       if (users.some(x => x.email === email)) fail('Email already registered');
       const u = { id: crypto.randomUUID(), email, hash, name: str(b.name, 80), grade: str(b.grade, 20), role, created: new Date().toISOString() };
@@ -145,9 +156,9 @@ const A = {
 
 // Open /api in a browser to see what is wrong (no secrets are shown)
 async function diagnose() {
-  const env = { GITHUB_TOKEN: !!process.env.GITHUB_TOKEN, GITHUB_REPO: !!REPO, JWT_SECRET: !!SECRET, TEACHER_CODE: !!process.env.TEACHER_CODE };
+  const env = { GITHUB_TOKEN: !!TOKEN, GITHUB_REPO: !!REPO, JWT_SECRET: !!SECRET, TEACHER_CODE: !!setting('TEACHER_CODE') };
   const out = { status: 'api is running', node: process.version, env };
-  if (Object.values(env).includes(false)) out.problem = 'Missing environment variable(s) marked false above. Add them in Vercel and redeploy.';
+  if (Object.values(env).includes(false)) out.problem = 'Setting(s) marked false above are empty. Fill them in the SETTINGS block at the top of api/index.js, then commit.';
   else if (!/^[\w.-]+\/[\w.-]+$/.test(REPO)) out.problem = 'GITHUB_REPO must look like owner/repo, not a URL';
   else {
     try {
@@ -175,8 +186,8 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') { try { return res.status(200).json(await diagnose()); } catch (e) { return res.status(500).json({ error: 'diagnose failed' }); } }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
-    if (!SECRET || !process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {
-      console.error('Missing environment variables: JWT_SECRET, GITHUB_TOKEN, GITHUB_REPO');
+    if (!SECRET || !TOKEN || !REPO) {
+      console.error('Missing settings: JWT_SECRET, GITHUB_TOKEN, GITHUB_REPO');
       fail('Server is not configured yet. Please contact the administrator.', 500);
     }
     let b = req.body;
