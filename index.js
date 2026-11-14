@@ -143,8 +143,36 @@ const A = {
   }
 };
 
+// Open /api in a browser to see what is wrong (no secrets are shown)
+async function diagnose() {
+  const env = { GITHUB_TOKEN: !!process.env.GITHUB_TOKEN, GITHUB_REPO: !!REPO, JWT_SECRET: !!SECRET, TEACHER_CODE: !!process.env.TEACHER_CODE };
+  const out = { status: 'api is running', node: process.version, env };
+  if (Object.values(env).includes(false)) out.problem = 'Missing environment variable(s) marked false above. Add them in Vercel and redeploy.';
+  else if (!/^[\w.-]+\/[\w.-]+$/.test(REPO)) out.problem = 'GITHUB_REPO must look like owner/repo, not a URL';
+  else {
+    try {
+      const r = await fetch('https://api.github.com/repos/' + REPO, { headers: H });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 200) {
+        out.github = { reachable: true, private: !!j.private };
+        if (!j.private) out.problem = 'Data repo is PUBLIC. Make it private (it stores emails and password hashes).';
+        const c = await fetch('https://api.github.com/repos/' + REPO + '/commits?per_page=1', { headers: H });
+        if (c.status === 409) out.problem = 'Data repo is empty. Create a README.md in it first.';
+      } else {
+        out.github = { reachable: false, httpStatus: r.status };
+        out.problem = r.status === 401 ? 'GITHUB_TOKEN is invalid or expired'
+          : r.status === 404 ? 'Repo not found, or the token has no access to it (token must be limited to this repo with Contents: Read and write)'
+          : 'GitHub returned ' + r.status;
+      }
+    } catch (e) { out.problem = 'Could not reach GitHub'; }
+  }
+  if (!out.problem) out.problem = 'none - setup looks fine';
+  return out;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  if (req.method === 'GET') { try { return res.status(200).json(await diagnose()); } catch (e) { return res.status(500).json({ error: 'diagnose failed' }); } }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
     if (!SECRET || !process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {
