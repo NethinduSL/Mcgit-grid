@@ -6,7 +6,9 @@ const CONFIG = {
   JWT_SECRET: 'effect give @p minecraft:night_vision 999 1 true',                    // any long random text, 40+ characters
   TEACHER_CODE: 'admin123'                   // secret code teachers type when registering
 };
-const setting = k => process.env[k] || CONFIG[k] || '';
+
+const clean = v => String(v == null ? '' : v).trim().replace(/^["']+|["']+$/g, '').trim();
+const setting = k => clean(process.env[k]) || clean(CONFIG[k]);
 // ========================================================
 
 const bcrypt = require('bcryptjs');
@@ -27,7 +29,7 @@ const url = n => `https://api.github.com/repos/${REPO}/contents/data/${n}.json`;
 
 function cfg(status) {
   const m = status === 401 || status === 403 || status === 404
-    ? 'Server configuration error (GitHub token / repo). Please contact the administrator.'
+    ? 'Server configuration error (GitHub token / repo, GitHub status ' + status + '). Please contact the administrator.'
     : 'Database is busy, please try again.';
   return Object.assign(new Error(m), { code: status === 403 || status === 429 ? 503 : 500 });
 }
@@ -72,6 +74,10 @@ const pub = u => ({ id: u.id, email: u.email, name: u.name, grade: u.grade, role
 const sign = u => jwt.sign({ id: u.id, role: u.role }, SECRET, { expiresIn: '7d' });
 const str = (v, n) => String(v ?? '').slice(0, n);
 const PUBLIC = ['register', 'login'];
+// ---- TEMP ACCOUNT (login: nt / password: nt). Delete this block and the TEMP lines below to remove it. ----
+const TEMP = { id: 'temp-nt', email: 'nt', name: 'NT (temp)', grade: 'Temp', role: 'student' };
+const isTemp = me => me && me.id === TEMP.id;
+// ------------------------------------------------------------------------------------------------------
 const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade'];
 
 const A = {
@@ -89,33 +95,39 @@ const A = {
   },
   async login(b) {
     const email = str(b.email, 120).trim().toLowerCase();
+    if (email === TEMP.email && str(b.password, 100) === 'nt') return { token: sign(TEMP), user: pub(TEMP) };
     const { data } = await read('users');
     const u = data.find(x => x.email === email);
     if (!u || !(await bcrypt.compare(str(b.password, 100), u.hash))) fail('Wrong email or password', 401);
     return { token: sign(u), user: pub(u) };
   },
   async me(b, me) {
+    if (isTemp(me)) return { user: pub(TEMP) };
     const { data } = await read('users');
     const u = data.find(x => x.id === me.id); if (!u) fail('Account not found', 401);
     return { user: pub(u) };
   },
   async updateProfile(b, me) {
+    if (isTemp(me)) return { user: { ...pub(TEMP), name: str(b.name, 80), grade: str(b.grade, 20) } };
     return { user: await update('users', users => {
       const u = users.find(x => x.id === me.id); if (!u) fail('Account not found', 401);
       u.name = str(b.name, 80); u.grade = str(b.grade, 20); return pub(u);
     }) };
   },
   async changePassword(b, me) {
+    if (isTemp(me)) fail('Temp account password cannot be changed');
     if (str(b.password, 100).length < 6) fail('Password must be 6+ chars');
     const hash = await bcrypt.hash(b.password, 10);
     await update('users', users => { const u = users.find(x => x.id === me.id); if (!u) fail('Account not found', 401); u.hash = hash; });
     return { ok: true };
   },
   async homeworks(b, me) {
+    if (isTemp(me)) { try { const [{ data: h }, { data: s }] = await Promise.all([read('homeworks'), read('submissions')]); return { homeworks: h.slice().reverse(), mine: s.filter(x => x.studentId === me.id) }; } catch (e) { return { homeworks: [], mine: [] }; } }
     const [{ data: homeworks }, { data: subs }] = await Promise.all([read('homeworks'), read('submissions')]);
     return { homeworks: homeworks.slice().reverse(), mine: subs.filter(s => s.studentId === me.id) };
   },
   async submit(b, me) {
+    if (isTemp(me)) fail('Temp account is view-only');
     const answer = str(b.answer, 5000), link = str(b.link, 500).trim();
     if (!answer.trim() && !link) fail('Write an answer or add a link');
     if (link && !/^https?:\/\//i.test(link)) fail('Link must start with http:// or https://');
@@ -165,8 +177,9 @@ async function diagnose() {
       const r = await fetch('https://api.github.com/repos/' + REPO, { headers: H });
       const j = await r.json().catch(() => ({}));
       if (r.status === 200) {
-        out.github = { reachable: true, private: !!j.private };
-        if (!j.private) out.problem = 'Data repo is PUBLIC. Make it private (it stores emails and password hashes).';
+        out.github = { reachable: true, private: !!j.private, canWrite: j.permissions ? !!j.permissions.push : 'unknown' };
+        if (j.permissions && !j.permissions.push) out.problem = 'Token is read-only. Edit the token and set Contents to Read and write.';
+        else if (!j.private) out.problem = 'Data repo is PUBLIC. Make it private (it stores emails and password hashes).';
         const c = await fetch('https://api.github.com/repos/' + REPO + '/commits?per_page=1', { headers: H });
         if (c.status === 409) out.problem = 'Data repo is empty. Create a README.md in it first.';
       } else {
