@@ -15,6 +15,7 @@ const H = {
   'X-GitHub-Api-Version': '2022-11-28'
 };
 const url = n => `https://api.github.com/repos/${REPO}/contents/data/${n}.json`;
+const fileUrl = p => `https://api.github.com/repos/${REPO}/contents/${p}`;
 
 function cfg(status) {
   const m = status === 401 || status === 403 || status === 404
@@ -62,7 +63,17 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 const PUBLIC = ['register', 'login'];
 const TEMP = { id: 'temp-nt', email: 'nt', name: 'NT (temp)', grade: 'Temp', role: 'student' };
 const isTemp = me => me && me.id === TEMP.id;
-const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade'];
+const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade', 'students', 'studentWork', 'marksSheet'];
+const IMG_RE = /^images\/[\w-]+\.(jpg|png|webp)$/;
+const cleanImgs = a => (Array.isArray(a) ? a : []).filter(p => typeof p === 'string' && IMG_RE.test(p)).slice(0, 5);
+const gradeKey = g => String(g || '').toUpperCase().replace(/\s+/g, '').replace(/^GRADE/, '');
+const cleanTargets = a => [...new Set((Array.isArray(a) ? a : []).map(gradeKey).filter(x => /^\d{1,2}(-[A-Z])?$/.test(x)))].slice(0, 60);
+const sees = (h, g) => {
+  const t = h.targets;
+  if (!Array.isArray(t) || !t.length) return true;
+  const k = gradeKey(g);
+  return t.some(x => x === k || x === k.split('-')[0]);
+};
 
 const A = {
   async register(b) {
@@ -107,26 +118,29 @@ const A = {
   },
   async homeworks(b, me) {
     if (isTemp(me)) { try { const [{ data: h }, { data: s }] = await Promise.all([read('homeworks'), read('submissions')]); return { homeworks: h.slice().reverse(), mine: s.filter(x => x.studentId === me.id) }; } catch (e) { return { homeworks: [], mine: [] }; } }
-    const [{ data: homeworks }, { data: subs }] = await Promise.all([read('homeworks'), read('submissions')]);
-    return { homeworks: homeworks.slice().reverse(), mine: subs.filter(s => s.studentId === me.id) };
+    const [{ data: homeworks }, { data: subs }, { data: users }] = await Promise.all([read('homeworks'), read('submissions'), me.role === 'student' ? read('users') : Promise.resolve({ data: [] })]);
+    let list = homeworks;
+    if (me.role === 'student') { const u = users.find(x => x.id === me.id); list = homeworks.filter(h => sees(h, u && u.grade)); }
+    return { homeworks: list.slice().reverse(), mine: subs.filter(s => s.studentId === me.id) };
   },
   async submit(b, me) {
     if (isTemp(me)) fail('Temp account is view-only');
     const answer = str(b.answer, 5000), link = str(b.link, 500).trim();
-    if (!answer.trim() && !link) fail('Write an answer or add a link');
+    const images = cleanImgs(b.images);
+    if (!answer.trim() && !link && !images.length) fail('Write an answer, add a link or attach an image');
     if (link && !/^https?:\/\//i.test(link)) fail('Link must start with http:// or https://');
     const { data: hws } = await read('homeworks');
     if (!hws.some(h => h.id === b.homeworkId)) fail('Homework not found', 404);
     await update('submissions', subs => {
       let s = subs.find(x => x.homeworkId === b.homeworkId && x.studentId === me.id);
       if (!s) { s = { id: crypto.randomUUID(), homeworkId: b.homeworkId, studentId: me.id, marks: null, feedback: '' }; subs.push(s); }
-      s.answer = answer; s.link = link; s.submittedAt = new Date().toISOString();
+      s.answer = answer; s.link = link; s.images = images; s.submittedAt = new Date().toISOString();
     });
     return { ok: true };
   },
   async createHomework(b, me) {
     if (!str(b.title, 150).trim()) fail('Title required');
-    await update('homeworks', h => h.push({ id: crypto.randomUUID(), title: str(b.title, 150), description: str(b.description, 3000), due: str(b.due, 10), by: me.id, created: new Date().toISOString() }));
+    await update('homeworks', h => h.push({ id: crypto.randomUUID(), title: str(b.title, 150), description: str(b.description, 3000), due: str(b.due, 10), images: cleanImgs(b.images), targets: cleanTargets(b.targets), total: b.total === '' || b.total == null || isNaN(Number(b.total)) ? null : Math.max(0, Math.min(1000, Number(b.total))), by: me.id, created: new Date().toISOString() }));
     return { ok: true };
   },
   async deleteHomework(b) {
@@ -139,6 +153,44 @@ const A = {
       const u = users.find(x => x.id === s.studentId) || {};
       return { ...s, name: u.name, grade: u.grade };
     }) };
+  },
+  async uploadImage(b, me) {
+    if (isTemp(me)) fail('Temp account is view-only');
+    const d = typeof b.data === 'string' ? b.data : '';
+    if (d.length > 4400000) fail('Image is too large');
+    const m = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(d);
+    if (!m) fail('Only JPG, PNG or WEBP images are allowed');
+    const path = `images/${crypto.randomUUID()}.${m[1] === 'jpeg' ? 'jpg' : m[1]}`;
+    const r = await fetch(fileUrl(path), { method: 'PUT', headers: H, body: JSON.stringify({ message: 'add image', content: m[2] }) });
+    if (!r.ok) { console.error('GitHub image write failed', r.status, await r.text()); throw cfg(r.status); }
+    return { path };
+  },
+  async getImage(b) {
+    const p = str(b.path, 100);
+    if (!IMG_RE.test(p)) fail('Bad image path');
+    const r = await fetch(fileUrl(p), { headers: { ...H, Accept: 'application/vnd.github.raw+json' }, cache: 'no-store' });
+    if (r.status === 404) fail('Image not found', 404);
+    if (!r.ok) { console.error('GitHub image read failed', r.status); throw cfg(r.status); }
+    const ext = p.split('.').pop();
+    return { data: `data:image/${ext === 'jpg' ? 'jpeg' : ext};base64,` + Buffer.from(await r.arrayBuffer()).toString('base64') };
+  },
+  async students() {
+    const [{ data: users }, { data: subs }] = await Promise.all([read('users'), read('submissions')]);
+    return { students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, email: u.email, grade: u.grade, submitted: subs.filter(s => s.studentId === u.id).length })) };
+  },
+  async studentWork(b) {
+    const [{ data: hws }, { data: subs }, { data: users }] = await Promise.all([read('homeworks'), read('submissions'), read('users')]);
+    const u = users.find(x => x.id === b.studentId && x.role === 'student');
+    if (!u) fail('Student not found', 404);
+    return { student: pub(u), items: hws.filter(h => sees(h, u.grade)).reverse().map(h => ({ homework: h, submission: subs.find(s => s.homeworkId === h.id && s.studentId === u.id) || null })) };
+  },
+  async marksSheet() {
+    const [{ data: hws }, { data: subs }, { data: users }] = await Promise.all([read('homeworks'), read('submissions'), read('users')]);
+    return {
+      homeworks: hws.map(h => ({ id: h.id, title: h.title, due: h.due, total: h.total ?? null, targets: h.targets || [] })),
+      students: users.filter(u => u.role === 'student').map(u => ({ id: u.id, name: u.name, email: u.email, grade: u.grade })),
+      submissions: subs.map(s => ({ homeworkId: s.homeworkId, studentId: s.studentId, marks: s.marks ?? null, submittedAt: s.submittedAt }))
+    };
   },
   async grade(b) {
     await update('submissions', subs => {
