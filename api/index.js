@@ -1,24 +1,17 @@
-// ================= SETTINGS (edit here) =================
-// Values set in Vercel Environment Variables (if any) override these.
 const CONFIG = {
-  GITHUB_TOKEN: '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',                  // paste your NEW GitHub token here (github_pat_...)
-  GITHUB_REPO: 'NethinduSL/Mcgitdb', // owner/repo of the private DATA repo
-  JWT_SECRET: 'effect give @p minecraft:night_vision 999 1 true',                    // any long random text, 40+ characters
-  TEACHER_CODE: 'admin123'                   // secret code teachers type when registering
+  GITHUB_TOKEN: '',
+  GITHUB_REPO: 'NethinduSL/Mcgitdb',
+  TEACHER_CODE: ''
 };
-
 const clean = v => String(v == null ? '' : v).trim().replace(/^["']+|["']+$/g, '').trim();
 const setting = k => clean(process.env[k]) || clean(CONFIG[k]);
-// ========================================================
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// ---------- GitHub JSON database ----------
-// GitHub repo as a JSON database. Each collection = data/<name>.json in a PRIVATE data repo.
-const REPO = setting('GITHUB_REPO');      // e.g. "nethindu/lms-data"
-const TOKEN = setting('GITHUB_TOKEN');    // fine-grained PAT, Contents: read/write, only that repo
+const REPO = setting('GITHUB_REPO');
+const TOKEN = setting('GITHUB_TOKEN');
 const H = {
   Authorization: `Bearer ${TOKEN}`,
   Accept: 'application/vnd.github+json',
@@ -55,29 +48,24 @@ async function write(name, data, sha) {
   if (!r.ok) { console.error('GitHub write failed', r.status, await r.text()); throw cfg(r.status); }
 }
 
-// read -> fn(data) mutates in place -> write. Retries if two people write at the same time.
 async function update(name, fn) {
   for (let i = 0; i < 5; i++) {
     const { data, sha } = await read(name);
-    const out = await fn(data);          // if fn throws, nothing is written
+    const out = await fn(data);
     try { await write(name, data, sha); return out; }
     catch (e) { if (!e.conflict) throw e; await new Promise(r => setTimeout(r, 250 * (i + 1))); }
   }
   throw Object.assign(new Error('Server busy, try again'), { code: 503 });
 }
-// ---------- API ----------
 
-
-const SECRET = setting('JWT_SECRET');
+const SECRET = TOKEN ? crypto.createHash('sha256').update('mcg-it-grid:' + TOKEN).digest('hex') : '';
 const fail = (m, c = 400) => { throw Object.assign(new Error(m), { code: c }); };
 const pub = u => ({ id: u.id, email: u.email, name: u.name, grade: u.grade, role: u.role });
 const sign = u => jwt.sign({ id: u.id, role: u.role }, SECRET, { expiresIn: '7d' });
 const str = (v, n) => String(v ?? '').slice(0, n);
 const PUBLIC = ['register', 'login'];
-// ---- TEMP ACCOUNT (login: nt / password: nt). Delete this block and the TEMP lines below to remove it. ----
 const TEMP = { id: 'temp-nt', email: 'nt', name: 'NT (temp)', grade: 'Temp', role: 'student' };
 const isTemp = me => me && me.id === TEMP.id;
-// ------------------------------------------------------------------------------------------------------
 const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade'];
 
 const A = {
@@ -140,7 +128,6 @@ const A = {
     });
     return { ok: true };
   },
-  // ---- teacher only ----
   async createHomework(b, me) {
     if (!str(b.title, 150).trim()) fail('Title required');
     await update('homeworks', h => h.push({ id: crypto.randomUUID(), title: str(b.title, 150), description: str(b.description, 3000), due: str(b.due, 10), by: me.id, created: new Date().toISOString() }));
@@ -166,9 +153,8 @@ const A = {
   }
 };
 
-// Open /api in a browser to see what is wrong (no secrets are shown)
 async function diagnose() {
-  const env = { GITHUB_TOKEN: !!TOKEN, GITHUB_REPO: !!REPO, JWT_SECRET: !!SECRET, TEACHER_CODE: !!setting('TEACHER_CODE') };
+  const env = { GITHUB_TOKEN: !!TOKEN, GITHUB_REPO: !!REPO, TEACHER_CODE: !!setting('TEACHER_CODE') };
   const out = { status: 'api is running', node: process.version, env };
   if (Object.values(env).includes(false)) out.problem = 'Setting(s) marked false above are empty. Fill them in the SETTINGS block at the top of api/index.js, then commit.';
   else if (!/^[\w.-]+\/[\w.-]+$/.test(REPO)) out.problem = 'GITHUB_REPO must look like owner/repo, not a URL';
@@ -200,7 +186,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
     if (!SECRET || !TOKEN || !REPO) {
-      console.error('Missing settings: JWT_SECRET, GITHUB_TOKEN, GITHUB_REPO');
+      console.error('Missing settings: GITHUB_TOKEN, GITHUB_REPO');
       fail('Server is not configured yet. Please contact the administrator.', 500);
     }
     let b = req.body;
