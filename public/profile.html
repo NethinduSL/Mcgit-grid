@@ -303,7 +303,7 @@ function renderNav(active) {
   const links = me.role === 'teacher'
     ? [['admin', 'admin.html', 'fa-chalkboard-user', 'Dashboard']]
     : [['home', 'home.html', 'fa-book-open', 'Homework'], ['polls', 'polls.html', 'fa-square-poll-vertical', 'Polls']];
-  links.push(['about', 'about.html', 'fa-circle-info', 'About'], ['profile', 'profile.html', 'fa-user', 'Profile']);
+  links.push(['chat', 'chat.html', 'fa-comments', 'Chat'], ['about', 'about.html', 'fa-circle-info', 'About'], ['profile', 'profile.html', 'fa-user', 'Profile']);
   const b = document.body;
   b.classList.add('has-side');
   try { if (localStorage.getItem('lms_side') === 'mini') b.classList.add('side-mini'); } catch (e) {}
