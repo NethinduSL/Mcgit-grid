@@ -1,1 +1,207 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffc900">
+<title>About · MCG ICT Grid · Made by Bit X Team</title>
+<meta name="description" content="MCG ICT Grid is an ICT learning space built by Bit X Team in Sri Lanka.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="icon" type="image/svg+xml" href="logos/favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="logos/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="logos/favicon-48.png">
+<link rel="shortcut icon" href="logos/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="logos/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<script>
+(function () {
+  let t;
+  try { t = localStorage.getItem('lms_theme'); } catch (e) {}
+  if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+:root{
+  --y:#ffc900;--y2:#e6b400;--yt:rgba(255,201,0,.14);--yl:rgba(255,201,0,.4);
+  --bg:#f5f5f2;--bg2:#ecece7;--card:#ffffff;--nav:rgba(255,255,255,.92);--tx:#121214;--g:#5f6168;--line:#e2e2dc;
+  --sh:0 1px 2px rgba(16,16,20,.05),0 6px 20px rgba(16,16,20,.06);--sh2:0 2px 4px rgba(16,16,20,.06),0 12px 30px rgba(16,16,20,.1);
+  --r:14px
+}
+:root[data-theme=dark]{
+  --yt:rgba(255,201,0,.13);--yl:rgba(255,201,0,.38);
+  --bg:#0d0d0e;--bg2:#141416;--card:#171719;--nav:rgba(15,15,16,.92);--tx:#f3f3f1;--g:#a1a3aa;--line:#2a2a2e;
+  --sh:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);--sh2:0 2px 4px rgba(0,0,0,.5),0 12px 30px rgba(0,0,0,.45)
+}
+*{box-sizing:border-box}
+html{color-scheme:light;scroll-behavior:smooth}
+html[data-theme=dark]{color-scheme:dark}
+body{margin:0;font-family:'Poppins','Noto Sans Sinhala',system-ui,sans-serif;font-size:14px;line-height:1.6;color:var(--tx);background:var(--bg);min-height:100vh;display:flex;flex-direction:column;animation:fade .35s ease both;transition:background .25s,color .25s}
+a{color:inherit}
+::selection{background:var(--y);color:#000}
+img{max-width:100%}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
+.crest{width:34px;height:34px;min-width:34px;max-width:34px;flex:none;object-fit:contain;display:block;border-radius:50%;background:#fff}
+.crest.lg{width:60px;height:60px;min-width:60px;max-width:60px}
+.crest.xl{width:96px;height:96px;min-width:96px;max-width:96px;box-shadow:var(--sh2);animation:floaty 5s ease-in-out infinite}
+@media(max-width:380px){.crest{width:30px;height:30px;min-width:30px;max-width:30px}.crest.xl{width:80px;height:80px;min-width:80px;max-width:80px}}
+
+.nav{position:sticky;top:0;z-index:10;background:var(--nav);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--tx);text-decoration:none;margin-right:auto;white-space:nowrap}
+.brand em{font-style:normal;color:var(--y2)}
+:root[data-theme=dark] .brand em{color:var(--y)}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer;display:grid;place-items:center;font-size:14px;transition:transform .25s,background .2s,border-color .2s}
+.icon-btn:hover{background:var(--bg2);border-color:var(--yl);transform:rotate(18deg)}
+.btn{background:var(--y);color:#111;border:1px solid transparent;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,201,0,.35)}
+.btn.sm{padding:7px 13px;font-size:12px}
+.btn.ghost{background:var(--card);color:var(--tx);border-color:var(--line)}
+.btn.ghost:hover{background:var(--bg2);border-color:var(--yl);box-shadow:none}
+
+.wrap{max-width:1080px;width:100%;margin:0 auto;padding:0 16px;flex:1 0 auto}
+.hero{text-align:center;padding:56px 0 34px;animation:up .5s ease both}
+.hero .crest.xl{margin:0 auto 20px}
+.hero h1{margin:0 0 10px;font-size:40px;line-height:1.1;letter-spacing:-1.2px}
+.hero h1 em{font-style:normal;color:var(--y2)}
+:root[data-theme=dark] .hero h1 em{color:var(--y)}
+.hero p{margin:0 auto;max-width:580px;color:var(--g);font-size:15px}
+.hero .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.sect{padding:26px 0}
+.sect h2{margin:0 0 6px;font-size:26px;letter-spacing:-.6px}
+.sect .sub{margin:0 0 20px;color:var(--g)}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--yt);border:1px solid var(--yl);padding:4px 13px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:12px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:var(--yl)}
+.card h3{margin:0 0 6px;font-size:16px}
+.card p{margin:0;color:var(--g)}
+.card .ic{width:40px;height:40px;border-radius:11px;background:var(--yt);color:var(--y2);display:grid;place-items:center;font-size:16px;margin-bottom:12px}
+:root[data-theme=dark] .card .ic{color:var(--y)}
+.person{display:flex;gap:14px;align-items:flex-start}
+.av{width:52px;height:52px;min-width:52px;border-radius:14px;background:var(--y);color:#111;display:grid;place-items:center;font-weight:700;font-size:20px}
+.person .role{font-size:12px;color:var(--g);margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);color:var(--g)}
+.tl{position:relative;margin-left:8px;padding-left:22px;border-left:2px solid var(--line)}
+.tl .it{position:relative;margin-bottom:18px}
+.tl .it::before{content:"";position:absolute;left:-30px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--y);border:3px solid var(--bg)}
+.tl .it small{color:var(--y2);font-weight:700;letter-spacing:.3px}
+:root[data-theme=dark] .tl .it small{color:var(--y)}
+.tl .it b{display:block;font-size:15px;margin:1px 0 2px}
+.tl .it span{color:var(--g)}
+.cta{background:#111;color:#fff;text-align:center;border-radius:18px;padding:40px 18px;margin:26px 0;position:relative;overflow:hidden}
+.cta::before{content:"";position:absolute;inset:auto 0 -120px 0;height:240px;background:radial-gradient(ellipse at 50% 100%,rgba(255,201,0,.4),transparent 70%)}
+.cta h2{margin:0 0 6px;font-size:28px;letter-spacing:-.8px;position:relative}
+.cta p{margin:0 0 18px;color:rgba(255,255,255,.7);position:relative}
+.cta .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative}
+.cta .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+.cta .btn.ghost:hover{background:rgba(255,255,255,.1)}
+.foot{text-align:center;color:var(--g);font-size:12px;padding:18px 16px 26px;border-top:1px solid var(--line);margin-top:20px}
+.foot b{color:var(--tx);font-weight:600}
+.foot a{text-decoration:none}
+@media(max-width:820px){.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.g2,.g3{grid-template-columns:1fr}.hero{padding:38px 0 24px}.hero h1{font-size:30px}.sect h2{font-size:22px}.cta h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+
+<div class="nav"><div class="in">
+  <a class="brand" href="index.html"><img class="crest" src="logos/favicon.svg" alt="MCG ICT Grid"><span>MCG <em>ICT Grid</em></span></a>
+  <button class="icon-btn" type="button" onclick="toggleTheme()" aria-label="Switch light / dark mode" title="Light / Dark"><i class="fa-solid theme-ic fa-moon"></i></button>
+  <a class="btn sm" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+</div></div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <img class="crest xl" src="logos/favicon.svg" alt="MCG ICT Grid crest">
+    <span class="tag"><i class="fa-solid fa-heart" style="color:#e5484d"></i> Made in Sri Lanka</span>
+    <h1>About <em>MCG ICT Grid</em></h1>
+    <p>A simple, fast and free ICT class space for students and their teacher, built by Bit X Team.</p>
+    <div class="acts">
+      <a class="btn" href="index.html"><i class="fa-solid fa-house"></i> Back to home</a>
+      <a class="btn ghost" href="https://bitxsl.vercel.app/" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Bit X Team</a>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>What is MCG ICT Grid?</h2>
+    <p class="sub">One place for the ICT class, with no clutter.</p>
+    <div class="grid g3">
+      <div class="card"><div class="ic"><i class="fa-solid fa-graduation-cap"></i></div><h3>Made for the class</h3><p>Students log in to their own space and see what matters for their grade and section.</p></div>
+      <div class="card"><div class="ic"><i class="fa-solid fa-chart-column"></i></div><h3>Marks &amp; progress</h3><p>Results show up right away, so nobody has to wait or guess how they are doing.</p></div>
+      <div class="card"><div class="ic"><i class="fa-solid fa-square-poll-vertical"></i></div><h3>Polls &amp; activities</h3><p>Quick polls and class activities keep everyone involved, on any phone or computer.</p></div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <span class="tag"><i class="fa-solid fa-code"></i> The organization</span>
+    <h2>Bit X Team</h2>
+    <p class="sub">A Sri Lankan creative tech organization building fast, free and powerful tools for the modern web.</p>
+    <div class="card person">
+      <div class="av">X</div>
+      <div>
+        <h3>Bit X Team</h3>
+        <p class="role">Creative tech organization · Sri Lanka</p>
+        <p>MCG ICT Grid was created by Bit X Team, an organization that builds web tools, REST APIs and experimental web experiences. Everything we make is built to be fast, free and accessible to everyone.</p>
+        <div class="chips"><span class="chip">Web Tools</span><span class="chip">REST APIs</span><span class="chip">UI Design</span><span class="chip">Open Platform</span><span class="chip">Made in Sri Lanka</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>What Bit X ships</h2>
+    <p class="sub">Free tools and APIs, all built in Sri Lanka.</p>
+    <div class="grid g3">
+      <a class="card" href="https://bit-x-tools.vercel.app/" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic"><i class="fa-solid fa-screwdriver-wrench"></i></div><h3>Bit X Tools</h3><p>A suite of free web tools: converters, translators, media downloaders and more. No signup needed.</p></a>
+      <a class="card" href="https://bit-x-apis.vercel.app/" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic"><i class="fa-solid fa-plug"></i></div><h3>Bit X API</h3><p>A free REST API platform for AI, media downloads, search and more, with one key and 50+ endpoints.</p></a>
+      <a class="card" href="https://bitxsl.vercel.app/projects.html" target="_blank" rel="noopener" style="text-decoration:none"><div class="ic"><i class="fa-solid fa-diagram-project"></i></div><h3>More projects</h3><p>See everything else the team has built and what is coming next.</p></a>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Our story</h2>
+    <p class="sub">From a side project to a growing ecosystem.</p>
+    <div class="tl">
+      <div class="it"><small>2023 · THE SPARK</small><b>The idea is born</b><span>Bit X starts building small web tools and begins turning them into a proper platform.</span></div>
+      <div class="it"><small>2024 · LAUNCH</small><b>Bit X Tools goes live</b><span>The first version launches on Vercel with a clean, fast design.</span></div>
+      <div class="it"><small>2024 · EXPANSION</small><b>Bit X API launches</b><span>50+ endpoints, a free tier, session auth, rate limiting and a developer dashboard.</span></div>
+      <div class="it"><small>NOW</small><b>Building the future</b><span>More tools, better APIs and projects like MCG ICT Grid, built for everyone.</span></div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Come build with us</h2>
+    <p>Use the tools, try the API, or just say hi.</p>
+    <div class="acts">
+      <a class="btn" href="https://bitxsl.vercel.app/#contact" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i> Contact Bit X Team</a>
+      <a class="btn ghost" href="index.html"><i class="fa-solid fa-house"></i> Back to MCG ICT Grid</a>
+    </div>
+  </section>
+
+</div>
+
+<div class="foot"><a href="index.html"><b>MCG ICT Grid</b></a> · Made with <i class="fa-solid fa-heart" style="color:#e5484d"></i> by <a href="https://bitxsl.vercel.app/" target="_blank" rel="noopener"><b>BIT X TEAM</b></a> · Sri Lanka</div>
+
+<script>
+function syncTheme() {
+  const t = document.documentElement.getAttribute('data-theme');
+  document.querySelectorAll('.theme-ic').forEach(i => { i.className = 'fa-solid theme-ic ' + (t === 'dark' ? 'fa-sun' : 'fa-moon'); });
+  const m = document.querySelector('meta[name=theme-color]');
+  if (m) m.setAttribute('content', t === 'dark' ? '#0d0d0e' : '#ffc900');
+}
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  try { localStorage.setItem('lms_theme', t); } catch (e) {}
+  syncTheme();
+}
+syncTheme();
+</script>
+</body></html>
