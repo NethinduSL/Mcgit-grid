@@ -42,11 +42,6 @@ img{max-width:100%}
 @keyframes shimmer{to{background-position:-200% 0}}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 
-.glogo{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;width:34px;height:34px;padding:6px;border-radius:10px;background:var(--y);flex:none}
-.glogo b{background:#111;border-radius:2px;transition:opacity .3s}.glogo b:nth-child(2),.glogo b:nth-child(3){opacity:.3}
-.brand:hover .glogo b:nth-child(2),.brand:hover .glogo b:nth-child(3){opacity:1}
-.glogo.lg{width:60px;height:60px;padding:11px;gap:5px;border-radius:17px}
-.glogo.lg b{border-radius:4px}
 
 .nav{position:sticky;top:0;z-index:30;background:var(--nav);-webkit-backdrop-filter:saturate(160%) blur(8px);backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid var(--line)}
 .nav .in{max-width:1080px;margin:auto;display:flex;align-items:center;gap:4px;padding:10px 16px}
@@ -242,12 +237,12 @@ input:disabled{opacity:.55;cursor:not-allowed}
 </style>
 <link rel="stylesheet" href="bitx.css">
 <script src="bitx.js" defer></script>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
-<link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="logos/favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="logos/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="logos/favicon-48.png">
+<link rel="shortcut icon" href="logos/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="logos/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <script>
 (function () {
@@ -291,10 +286,10 @@ function guard(role) {
   return true;
 }
 
-const logoImg = (c = '') => '<img class="logo ' + c + '" src="logo.png" alt="MCG ICT Grid" onerror="logoFail(this)">';
+const logoImg = (c = '') => '<img class="logo ' + c + '" src="logos/logo.png" alt="MCG ICT Grid" onerror="logoFail(this)">';
 function logoFail(i) {
-  const s = document.createElement('span'); s.className = 'glogo' + (i.classList.contains('lg') ? ' lg' : '');
-  s.innerHTML = '<b></b><b></b><b></b><b></b>'; i.replaceWith(s);
+  const s = document.createElement('img'); s.className = 'logo' + (i.classList.contains('lg') ? ' lg' : '');
+  s.src = 'logos/favicon.svg'; s.alt = 'MCG ICT Grid'; i.onerror = null; i.replaceWith(s);
 }
 function themeBtn() {
   return '<button class="icon-btn" type="button" onclick="toggleTheme()" aria-label="Switch light / dark mode" title="Light / Dark"><i class="fa-solid theme-ic fa-moon"></i></button>';
@@ -311,7 +306,7 @@ function toggleTheme() {
   try { localStorage.setItem('lms_theme', t); } catch (e) {}
   syncTheme();
 }
-const footHtml = '<div class="foot"><a class="madeby" href="about.html"><img class="crest xs" src="favicon.svg" alt="" onerror="this.remove()"><b>MCG ICT Grid</b> · Made with <i class="fa-solid fa-heart" style="color:#e5484d"></i> by <b>BITX TEAM</b></a></div>';
+const footHtml = '<div class="foot"><a class="madeby" href="about.html"><img class="crest xs" src="logos/favicon.svg" alt="" onerror="this.remove()"><b>MCG ICT Grid</b> · Made with <i class="fa-solid fa-heart" style="color:#e5484d"></i> by <b>BITX TEAM</b></a></div>';
 function renderNav(active) {
   const links = me.role === 'teacher'
     ? [['admin', 'admin.html', 'fa-chalkboard-user', 'Dashboard']]
@@ -541,7 +536,7 @@ function reveal() {
 </head>
 <body>
 <div class="nav"><div class="in">
-  <a class="brand" href="index.html"><img class="logo" src="logo.png" alt="MCG ICT Grid" onerror="logoFail(this)"><span>MCG <em>ICT Grid</em></span></a>
+  <a class="brand" href="index.html"><img class="logo" src="logos/logo.png" alt="MCG ICT Grid" onerror="logoFail(this)"><span>MCG <em>ICT Grid</em></span></a>
   <a class="link hide-xs" href="#features"><span class="txt" style="display:inline">What's inside</span></a>
   <a class="link hide-xs" href="#how"><span class="txt" style="display:inline">How it works</span></a>
   <span id="themeslot"></span>
@@ -552,7 +547,7 @@ function reveal() {
   <span class="blob a"></span><span class="blob b"></span><span class="dots"></span>
   <section class="hero">
     <div>
-      <span class="tag mono"><img class="crest xs" src="favicon.svg" alt="" onerror="this.outerHTML='<i class=&quot;fa-solid fa-graduation-cap&quot;></i>'"> your ICT class space</span>
+      <span class="tag mono"><img class="crest xs" src="logos/favicon.svg" alt="" onerror="this.outerHTML='<i class=&quot;fa-solid fa-graduation-cap&quot;></i>'"> your ICT class space</span>
       <h1>Class work, made <span class="rot"><span class="rot-in"><b>simple.</b><b>fun.</b><b>quick.</b><b>simple.</b></span></span></h1>
       <p class="lead">Homework, quizzes and marks. All in one place.</p>
       <div class="cta">
@@ -611,7 +606,7 @@ function reveal() {
   </section></div>
 
   <div class="ctaband">
-    <img class="crest lgc" src="favicon.svg" alt="School logo" onerror="this.remove()">
+    <img class="crest lgc" src="logos/favicon.svg" alt="School logo" onerror="this.remove()">
     <img class="ctabg" src="images/cta-bg.jpg" alt="" onerror="this.remove()">
     <h2 class="rv">Ready when you are</h2>
     <a class="btn lg rv" id="bandcta" href="login.html" style="margin-top:16px;--d:.1s"><i class="fa-solid fa-right-to-bracket"></i> Let's go</a>
