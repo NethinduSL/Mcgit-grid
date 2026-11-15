@@ -28,6 +28,13 @@ a{color:inherit}
 ::selection{background:var(--y);color:#000}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px}
 img{max-width:100%}
+.logo{width:40px;height:40px;min-width:40px;max-width:40px;flex:none;object-fit:contain;display:block;border-radius:10px;background:#fff}
+.logo.lg{width:60px;height:60px;min-width:60px;max-width:60px;border-radius:14px}
+.crest{width:32px;height:32px;min-width:32px;max-width:32px;flex:none;object-fit:contain;display:inline-block;vertical-align:middle}
+.crest.xs{width:18px;height:18px;min-width:18px;max-width:18px}
+.crest.lgc{width:84px;height:84px;min-width:84px;max-width:84px;display:block;margin:0 auto 14px;position:relative;z-index:1}
+@media(max-width:760px){.logo{width:34px;height:34px;min-width:34px;max-width:34px;border-radius:9px}.logo.lg{width:52px;height:52px;min-width:52px;max-width:52px}.crest.lgc{width:68px;height:68px;min-width:68px;max-width:68px}}
+@media(max-width:380px){.logo{width:30px;height:30px;min-width:30px;max-width:30px}.crest.lgc{width:60px;height:60px;min-width:60px;max-width:60px}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
@@ -236,6 +243,12 @@ input:disabled{opacity:.55;cursor:not-allowed}
 <link rel="stylesheet" href="bitx.css">
 <script src="bitx.js" defer></script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <script>
 (function () {
   let t;
