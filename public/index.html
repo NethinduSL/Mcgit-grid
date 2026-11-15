@@ -237,11 +237,11 @@ input:disabled{opacity:.55;cursor:not-allowed}
 </style>
 <link rel="stylesheet" href="bitx.css">
 <script src="bitx.js" defer></script>
-<link rel="icon" type="image/png" sizes="16x16" href="logos/favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="logos/favicon-48.png">
-<link rel="shortcut icon" href="logos/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="logos/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="logos/favicon-16.png?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="48x48" href="logos/favicon-48.png?v=2">
+<link rel="shortcut icon" href="logos/favicon.ico?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="logos/apple-touch-icon.png?v=2">
 <link rel="manifest" href="site.webmanifest">
 <script>
 (function () {
@@ -522,6 +522,8 @@ function reveal() {
 .ctaband h2{font-family:var(--disp);font-size:42px;letter-spacing:-1.2px;position:relative}
 .ctaband .btn,.ctaband .hand{position:relative}
 .ctaband .hand{display:block;margin-top:16px;color:var(--y);transform:rotate(-2deg)}
+.chip-f.c1,.chip-f.c3{animation:none}
+@media(max-width:1024px){.chip-f .ct{display:none}.chip-f{padding:9px 11px;gap:0}.chip-f i{font-size:14px}}
 .chip-f{pointer-events:none;transition:translate .35s cubic-bezier(.2,.8,.2,1);will-change:translate}
 @media(max-width:900px){
   .bento{grid-template-columns:1fr 1fr}.bx.big{grid-column:span 2;grid-row:auto}.bx.wide{grid-column:span 2}
@@ -530,7 +532,7 @@ function reveal() {
   .landing h1{font-size:42px;letter-spacing:-1.4px}.landing .sect h2{font-size:32px}.ctaband h2{font-size:32px}
   .stage{max-width:380px;margin:0 auto;width:100%}.chip-f.c2{left:-6px}.chip-f.c1{right:-6px}.steps2::before{display:none}
 }
-@media(max-width:520px){.chip-f.c2{display:none}.bento{grid-template-columns:1fr}.bx.big,.bx.wide{grid-column:auto}.chip-f.c3{display:none}}
+@media(max-width:520px){.bento{grid-template-columns:1fr}.bx.big,.bx.wide{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.mbars b::before{width:var(--t)}.tiltwrap{transform:none!important}}
 </style>
 </head>
@@ -568,9 +570,9 @@ function reveal() {
         <div class="mq-score"><span>Question 1 of 5</span><span class="badge ok"><i class="fa-solid fa-check"></i> Correct!</span></div>
       </div>
       <div class="polaroid"><div class="ph "><img class="phimg" src="images/hero.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b>Photo</b><small>images/hero.jpg · 300×280</small></span></div><span class="cap">our class</span></div>
-      <span class="chip-f c1"><i class="fa-solid fa-star"></i> 18 / 20</span>
-      <span class="chip-f c2"><i class="fa-solid fa-circle-check"></i> Submitted</span>
-      <span class="chip-f c3"><i class="fa-solid fa-chart-simple"></i> Class results</span>
+      <span class="chip-f c1"><i class="fa-solid fa-star"></i><span class="ct"> 18 / 20</span></span>
+      <span class="chip-f c2"><i class="fa-solid fa-circle-check"></i></span>
+      <span class="chip-f c3"><i class="fa-solid fa-chart-simple"></i><span class="ct"> Class results</span></span>
     </div></div>
   </section>
 
@@ -627,7 +629,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(hove
 }
 (function () {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const chips = [].slice.call(document.querySelectorAll('.chip-f'));
+  const chips = [].slice.call(document.querySelectorAll('.chip-f.c2'));
   if (!chips.length) return;
   const R = 130, MAX = 100;
   let back;
