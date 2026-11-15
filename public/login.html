@@ -35,11 +35,9 @@ img{max-width:100%}
 @keyframes shimmer{to{background-position:-200% 0}}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 
-.glogo{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;width:34px;height:34px;padding:6px;border-radius:10px;background:var(--y);flex:none}
-.glogo b{background:#111;border-radius:2px;transition:opacity .3s}.glogo b:nth-child(2),.glogo b:nth-child(3){opacity:.3}
-.brand:hover .glogo b:nth-child(2),.brand:hover .glogo b:nth-child(3){opacity:1}
-.glogo.lg{width:60px;height:60px;padding:11px;gap:5px;border-radius:17px}
-.glogo.lg b{border-radius:4px}
+.crest{width:34px;height:34px;min-width:34px;max-width:34px;flex:none;object-fit:contain;display:block;border-radius:50%;background:#fff}
+.crest.lg{width:60px;height:60px;min-width:60px;max-width:60px}
+@media(max-width:380px){.crest{width:30px;height:30px;min-width:30px;max-width:30px}.crest.lg{width:52px;height:52px;min-width:52px;max-width:52px}}
 
 .nav{position:sticky;top:0;z-index:30;background:var(--nav);-webkit-backdrop-filter:saturate(160%) blur(8px);backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid var(--line)}
 .nav .in{max-width:1080px;margin:auto;display:flex;align-items:center;gap:4px;padding:10px 16px}
@@ -236,7 +234,13 @@ input:disabled{opacity:.55;cursor:not-allowed}
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="bitx.css">
 <script src="bitx.js" defer></script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffc900'/%3E%3Crect x='12' y='12' width='18' height='18' rx='3' fill='%23111'/%3E%3Crect x='34' y='12' width='18' height='18' rx='3' fill='%23111' opacity='.35'/%3E%3Crect x='12' y='34' width='18' height='18' rx='3' fill='%23111' opacity='.35'/%3E%3Crect x='34' y='34' width='18' height='18' rx='3' fill='%23111'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="icon" type="image/svg+xml" href="logos/favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="logos/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="logos/favicon-48.png">
+<link rel="shortcut icon" href="logos/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="logos/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <script>
 (function () {
   let t;
@@ -303,7 +307,7 @@ function renderNav(active) {
   const b = document.body;
   b.classList.add('has-side');
   try { if (localStorage.getItem('lms_side') === 'mini') b.classList.add('side-mini'); } catch (e) {}
-  const logo = '<span class="glogo"><b></b><b></b><b></b><b></b></span>';
+  const logo = '<img class="crest" src="logos/favicon.svg" alt="MCG ICT Grid">';
   $('nav').innerHTML = `
     <div class="mtop"><button class="burger" type="button" onclick="sideToggle()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
       <a class="brand" href="index.html">${logo}<span>MCG <em>IT Grid</em></span></a>${themeBtn()}</div>
@@ -449,7 +453,7 @@ function reveal() {
 </head>
 <body>
 <div class="nav"><div class="in">
-  <a class="brand" href="index.html"><span class="glogo"><b></b><b></b><b></b><b></b></span><span>MCG <em>IT Grid</em></span></a>
+  <a class="brand" href="index.html"><img class="crest" src="logos/favicon.svg" alt="MCG ICT Grid"><span>MCG <em>IT Grid</em></span></a>
   <a class="link" href="index.html"><i class="fa-solid fa-arrow-left"></i><span>Back to home</span></a>
   <span id="themeslot"></span>
 </div></div>
@@ -457,7 +461,7 @@ function reveal() {
 <div class="auth"><div class="authbox">
   <div class="left">
     <div class="ph cover"><img class="phimg" src="images/login.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b></b><small>images/login.jpg · 900×1100</small></span></div>
-    <span class="glogo lg"><b></b><b></b><b></b><b></b></span>
+    <img class="crest lg" src="logos/favicon.svg" alt="MCG ICT Grid">
     <h1>MCG <em>IT Grid</em></h1>
     <p>Your ICT class space.</p>
     <ul>
