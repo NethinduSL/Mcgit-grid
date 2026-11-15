@@ -233,6 +233,8 @@ input:disabled{opacity:.55;cursor:not-allowed}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
 </style>
+<link rel="stylesheet" href="bitx.css">
+<script src="bitx.js" defer></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffc900'/%3E%3Crect x='12' y='12' width='18' height='18' rx='3' fill='%23111'/%3E%3Crect x='34' y='12' width='18' height='18' rx='3' fill='%23111' opacity='.35'/%3E%3Crect x='12' y='34' width='18' height='18' rx='3' fill='%23111' opacity='.35'/%3E%3Crect x='34' y='34' width='18' height='18' rx='3' fill='%23111'/%3E%3C/svg%3E" type="image/svg+xml">
 <script>
 (function () {
@@ -291,19 +293,37 @@ function toggleTheme() {
   try { localStorage.setItem('lms_theme', t); } catch (e) {}
   syncTheme();
 }
-const footHtml = '<div class="foot"><b>MCG IT Grid</b> · ICT Learning Management System</div>';
+const footHtml = '<div class="foot"><a class="madeby" href="about.html"><b>MCG IT Grid</b> · Made with <i class="fa-solid fa-heart" style="color:#e5484d"></i> by <b>BITX TEAM</b></a></div>';
 function renderNav(active) {
   const links = me.role === 'teacher'
     ? [['admin', 'admin.html', 'fa-chalkboard-user', 'Dashboard']]
-    : [['home', 'home.html', 'fa-book-open', 'Homework']];
-  links.push(['profile', 'profile.html', 'fa-user', 'Profile']);
-  $('nav').innerHTML = `<div class="in">
-    <a class="brand" href="index.html"><span class="glogo"><b></b><b></b><b></b><b></b></span><span>MCG <em>IT Grid</em></span></a>
-    ${links.map(l => `<a class="link ${l[0] === active ? 'on' : ''}" href="${l[1]}"><i class="fa-solid ${l[2]}"></i><span>${l[3]}</span></a>`).join('')}
-    ${themeBtn()}
-    <button class="link" type="button" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button></div>`;
+    : [['home', 'home.html', 'fa-book-open', 'Homework'], ['polls', 'polls.html', 'fa-square-poll-vertical', 'Polls']];
+  links.push(['about', 'about.html', 'fa-circle-info', 'About'], ['profile', 'profile.html', 'fa-user', 'Profile']);
+  const b = document.body;
+  b.classList.add('has-side');
+  try { if (localStorage.getItem('lms_side') === 'mini') b.classList.add('side-mini'); } catch (e) {}
+  const logo = '<span class="glogo"><b></b><b></b><b></b><b></b></span>';
+  $('nav').innerHTML = `
+    <div class="mtop"><button class="burger" type="button" onclick="sideToggle()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+      <a class="brand" href="index.html">${logo}<span>MCG <em>IT Grid</em></span></a>${themeBtn()}</div>
+    <div class="scrim" onclick="sideToggle(false)"></div>
+    <aside class="side" id="side">
+      <a class="brand" href="index.html">${logo}<span class="bt">MCG <em>IT Grid</em></span></a>
+      <a class="ucard" href="profile.html" title="My profile"><span class="av">${esc(initials(me.name))}</span><span class="ut"><b>${esc(me.name)}</b><small>${esc(me.role)}${me.grade ? ' · ' + esc(me.grade) : ''}</small></span></a>
+      <nav class="sl">${links.map((l, i) => `<a class="sitem ${l[0] === active ? 'on' : ''}" style="--i:${i}" href="${l[1]}" title="${l[3]}"><i class="fa-solid ${l[2]}"></i><span>${l[3]}</span></a>`).join('')}</nav>
+      <div class="sbot">
+        <button class="sitem" type="button" onclick="toggleTheme()" title="Light / Dark"><i class="fa-solid theme-ic fa-moon"></i><span>Theme</span></button>
+        <button class="sitem collapse" type="button" onclick="sideMini()" title="Collapse"><i class="fa-solid fa-angles-left"></i><span>Collapse</span></button>
+        <button class="sitem out" type="button" onclick="logout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+      </div>
+    </aside>`;
   if (!document.querySelector('.foot')) document.body.insertAdjacentHTML('beforeend', footHtml);
   syncTheme();
+}
+function sideToggle(open) { document.body.classList.toggle('side-open', open === undefined ? !document.body.classList.contains('side-open') : open); }
+function sideMini() {
+  const m = document.body.classList.toggle('side-mini');
+  try { localStorage.setItem('lms_side', m ? 'mini' : ''); } catch (e) {}
 }
 let tt;
 function toast(t, bad) {
@@ -425,70 +445,171 @@ function reveal() {
   els.forEach(e => io.observe(e));
 }
 </script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style id="landing-plus">
+/* fonts: Bricolage Grotesque = headings, Poppins = body, Caveat = handwritten notes, JetBrains Mono = small labels */
+.landing{--disp:'Bricolage Grotesque','Poppins',sans-serif;--hand:'Caveat',cursive;--mono:'JetBrains Mono',ui-monospace,monospace}
+.landing h1,.landing h2,.landing .tile2 b,.landing .step2 b,.brand{font-family:var(--disp)}
+.landing h1{font-size:64px;line-height:1.02;letter-spacing:-2.2px;font-weight:800}
+.landing .sect h2{font-size:40px;letter-spacing:-1.2px;font-weight:800}
+.mono{font-family:var(--mono)!important;font-weight:500;letter-spacing:.2px}
+.hand{font-family:var(--hand);font-weight:700;font-size:25px;line-height:1;color:var(--y2)}
+:root[data-theme=dark] .hand{color:var(--y)}
+.dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 20%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 20%,#000 20%,transparent 70%);opacity:.8}
+.landing .hero{padding:84px 16px 70px;gap:30px}
+.landing .tag{font-size:12px}
+.note{display:flex;align-items:flex-end;gap:6px;margin-top:22px;transform:rotate(-3deg);animation:up .8s .5s ease both}
+.note svg{width:46px;height:34px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transform:translateY(8px)}
+/* hero stage */
+.stage{position:relative;perspective:900px;padding:26px 0}
+.tiltwrap{position:relative;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.chip-f{position:absolute;display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:30px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh2);font:700 12px var(--mono);white-space:nowrap;animation:floaty 5s ease-in-out infinite}
+.chip-f i{color:var(--y2)}
+.chip-f.c1{top:-6px;right:-14px;animation-delay:-1s}
+.chip-f.c1 i{color:#e0a800}
+.chip-f.c2{top:64px;left:-46px;animation-delay:-2.5s}
+.chip-f.c2 i{color:var(--green)}
+.chip-f.c3{bottom:-8px;right:34px;animation-delay:-4s}
+/* marquee */
+.marquee{overflow:hidden;border-block:1px solid var(--line);background:var(--y);color:#111;position:relative;z-index:1;transform:rotate(-1deg);margin:6px -20px 0}
+.mtrack{display:flex;width:max-content;animation:marq 30s linear infinite}
+.mtrack span{display:inline-flex;gap:22px;align-items:center;padding:13px 11px;font:700 14px var(--mono);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap}
+.mtrack span::after{content:"\2726";font-size:12px;margin-left:11px}
+@keyframes marq{to{transform:translateX(-50%)}}
+.marquee:hover .mtrack{animation-play-state:paused}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(120px,auto);gap:14px;margin-top:34px}
+.bx{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;transition:transform .3s,box-shadow .3s,border-color .3s}
+.bx:hover{transform:translateY(-5px);box-shadow:var(--sh2);border-color:var(--yl)}
+.bx>i{width:46px;height:46px;border-radius:14px;background:var(--y);color:#111;display:grid;place-items:center;font-size:19px;margin-bottom:14px;transition:transform .3s}
+.bx:hover>i{transform:rotate(-10deg) scale(1.1)}
+.bx h3{font-family:var(--disp);font-size:20px;margin:0 0 4px;letter-spacing:-.4px}
+.bx p{margin:0;color:var(--g);font-size:14px}
+.bx.big{grid-column:span 2;grid-row:span 2;background:#111;color:#fff;border-color:#111}
+.bx.big p{color:rgba(255,255,255,.7)}
+.bx.big::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:var(--y);opacity:.2;filter:blur(30px)}
+.bx.big h3{font-size:28px}
+.mbars{margin-top:22px;display:grid;gap:11px;position:relative;z-index:1}
+.mbars div{display:flex;align-items:center;gap:12px;font:500 12px var(--mono);color:rgba(255,255,255,.85)}
+.mbars em{flex:0 0 74px;font-style:normal}
+.mbars b{flex:1;height:10px;border-radius:10px;background:rgba(255,255,255,.12);overflow:hidden}
+.mbars b::before{content:"";display:block;height:100%;width:0;border-radius:10px;background:var(--y);animation:mfill 4.5s ease-in-out infinite}
+.mbars div:nth-child(1) b::before{--t:82%}
+.mbars div:nth-child(2) b::before{--t:55%;animation-delay:.15s;background:#ff9f00}
+.mbars div:nth-child(3) b::before{--t:30%;animation-delay:.3s;background:#5be08f}
+@keyframes mfill{0%{width:0}25%,85%{width:var(--t)}100%{width:0}}
+.bx.wide{grid-column:span 2}
+.bx .hand{position:absolute;right:18px;top:14px;transform:rotate(6deg);font-size:22px}
+/* steps */
+.steps2::before{content:"";position:absolute;left:16%;right:16%;top:33px;border-top:2.5px dashed var(--yl);z-index:0}
+.step2{position:relative;z-index:1}
+.step2::before{position:relative;z-index:1}
+/* cta */
+.ctaband{position:relative;overflow:hidden;padding:70px 16px}
+.ctaband::before{content:"";position:absolute;inset:auto 0 -120px 0;height:260px;background:radial-gradient(ellipse at 50% 100%,rgba(255,201,0,.45),transparent 70%)}
+.ctaband h2{font-family:var(--disp);font-size:42px;letter-spacing:-1.2px;position:relative}
+.ctaband .btn,.ctaband .hand{position:relative}
+.ctaband .hand{display:block;margin-top:16px;color:var(--y);transform:rotate(-2deg)}
+@media(max-width:900px){
+  .bento{grid-template-columns:1fr 1fr}.bx.big{grid-column:span 2;grid-row:auto}.bx.wide{grid-column:span 2}
+}
+@media(max-width:820px){
+  .landing h1{font-size:42px;letter-spacing:-1.4px}.landing .sect h2{font-size:32px}.ctaband h2{font-size:32px}
+  .stage{max-width:380px;margin:0 auto;width:100%}.chip-f.c2{left:-6px}.chip-f.c1{right:-6px}.steps2::before{display:none}
+}
+@media(max-width:520px){.chip-f.c2{display:none}.bento{grid-template-columns:1fr}.bx.big,.bx.wide{grid-column:auto}.chip-f.c3{display:none}}
+@media(prefers-reduced-motion:reduce){.mbars b::before{width:var(--t)}.tiltwrap{transform:none!important}}
+</style>
 </head>
 <body>
 <div class="nav"><div class="in">
   <a class="brand" href="index.html"><span class="glogo"><b></b><b></b><b></b><b></b></span><span>MCG <em>IT Grid</em></span></a>
-  <a class="link" href="#features"><span class="txt" style="display:inline">Features</span></a>
-  <a class="link" href="#how"><span class="txt" style="display:inline">How it works</span></a>
+  <a class="link hide-xs" href="#features"><span class="txt" style="display:inline">What's inside</span></a>
+  <a class="link hide-xs" href="#how"><span class="txt" style="display:inline">How it works</span></a>
   <span id="themeslot"></span>
   <a class="btn sm" id="navcta" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
 </div></div>
 
 <div class="landing">
+  <span class="blob a"></span><span class="blob b"></span><span class="dots"></span>
   <section class="hero">
     <div>
-      <span class="tag"><i class="fa-solid fa-graduation-cap"></i> ICT Learning Management System</span>
-      <h1>Homework made <em>simple</em> for every class.</h1>
-      <p class="lead">Teachers post homework with images for any grade or section. Students submit their work online and see their marks and feedback in one place.</p>
+      <span class="tag mono"><i class="fa-solid fa-graduation-cap"></i> your ICT class space</span>
+      <h1>Class work, made <span class="rot"><span class="rot-in"><b>simple.</b><b>fun.</b><b>quick.</b><b>simple.</b></span></span></h1>
+      <p class="lead">Homework, quizzes and marks. All in one place.</p>
       <div class="cta">
         <a class="btn lg" id="herocta" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-        <a class="btn lg ghost" href="#features">See features</a>
+        <a class="btn lg ghost" href="#features">See what's inside</a>
       </div>
+      <div class="note hand">try a quiz, it's fun!
+        <svg viewBox="0 0 46 34" aria-hidden="true"><path d="M3 4c14 0 28 6 34 24"/><path d="M28 24l9 5 3-10"/></svg></div>
     </div>
-    <div class="mock" aria-hidden="true">
-      <div class="mh"><span></span><span></span><span></span></div>
-      <div class="mi"><i class="fa-solid fa-laptop-code"></i><div><b>HTML Basics</b><small>Grade 8 · Due 20 Nov</small></div><span class="badge ok">Submitted</span></div>
-      <div class="mi"><i class="fa-solid fa-table"></i><div><b>Spreadsheet Practice</b><small>Grade 7-B · Due 24 Nov</small></div><span class="badge y">Pending</span></div>
-      <div class="mi"><i class="fa-solid fa-image"></i><div><b>Network Diagram</b><small>Grade 6 · Image attached</small></div><span class="badge">18 / 20</span></div>
+    <div class="stage" aria-hidden="true"><div class="tiltwrap" id="tilt">
+      <div class="mock q-mock">
+        <div class="mh"><span></span><span></span><span></span></div>
+        <div class="mq-bar"><i></i></div>
+        <p class="mq-t">Which one is an input device?</p>
+        <div class="mq-o">Monitor</div>
+        <div class="mq-o o2">Keyboard</div>
+        <div class="mq-o">Speaker</div>
+        <div class="mq-score"><span>Question 1 of 5</span><span class="badge ok"><i class="fa-solid fa-check"></i> Correct!</span></div>
+      </div>
+      <div class="polaroid"><div class="ph "><img class="phimg" src="images/hero.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b>Photo</b><small>images/hero.jpg · 300×280</small></span></div><span class="cap">our class</span></div>
+      <span class="chip-f c1"><i class="fa-solid fa-star"></i> 18 / 20</span>
+      <span class="chip-f c2"><i class="fa-solid fa-circle-check"></i> Submitted</span>
+      <span class="chip-f c3"><i class="fa-solid fa-chart-simple"></i> Class results</span>
+    </div></div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="mtrack"><span><span>Homework</span><span>Polls</span><span>Quizzes</span><span>Marks</span><span>Feedback</span><span>Excel sheets</span><span>Light &amp; dark</span></span><span><span>Homework</span><span>Polls</span><span>Quizzes</span><span>Marks</span><span>Feedback</span><span>Excel sheets</span><span>Light &amp; dark</span></span></div></div>
+
+  <section class="sect" id="features">
+    <h2 class="rv" style="text-align:left">What's inside</h2>
+    <div class="bento">
+      <div class="bx big rv"><i class="fa-solid fa-square-poll-vertical"></i><h3>Polls &amp; quizzes</h3><p>Tap the right answer. Get your marks straight away.</p>
+        <div class="mbars"><div><em>Keyboard</em><b></b></div><div><em>Monitor</em><b></b></div><div><em>Speaker</em><b></b></div></div></div>
+      <div class="bx rv" style="--d:.08s"><i class="fa-solid fa-book-open"></i><h3>Homework</h3><p>Post it with photos</p></div>
+      <div class="bx rv" style="--d:.16s"><i class="fa-solid fa-star"></i><h3>Instant marks</h3><p>See your score at once</p></div>
+      <div class="bx wide rv" style="--d:.24s"><i class="fa-solid fa-file-excel"></i><h3>Excel sheets</h3><p>Download a whole class in one click</p><span class="hand">so easy!</span></div>
     </div>
   </section>
 
-  <div class="band"><section class="sect" id="features">
-    <h2 class="rv">Everything a class needs</h2>
-    <p class="sl rv">A clean workspace for teachers and students, built for day-to-day ICT lessons.</p>
-    <div class="feats">
-      <div class="feat rv"><i class="fa-solid fa-image"></i><h3>Images with homework</h3><p>Attach photos and diagrams to any homework so students see exactly what to do.</p></div>
-      <div class="feat rv"><i class="fa-solid fa-people-group"></i><h3>Grade and section wise</h3><p>Send homework to Grade 6, 7 or 8, or only to sections A to G.</p></div>
-      <div class="feat rv"><i class="fa-solid fa-paper-plane"></i><h3>Online submission</h3><p>Students answer in text, add a link or upload photos of their work.</p></div>
-      <div class="feat rv"><i class="fa-solid fa-star"></i><h3>Marks and feedback</h3><p>Open any student's work, give marks and leave feedback they can read straight away.</p></div>
-      <div class="feat rv"><i class="fa-solid fa-file-excel"></i><h3>Excel mark sheets</h3><p>Download marks for a class or section as an Excel file in one click.</p></div>
-      <div class="feat rv"><i class="fa-solid fa-circle-half-stroke"></i><h3>Light and dark mode</h3><p>Switch the look anytime to suit your screen and your eyes.</p></div>
+  <section class="sect" id="gallery">
+    <h2 class="rv" style="text-align:left">Around the class</h2>
+    <div class="gal3">
+      <figure class="rv"><div class="ph "><img class="phimg" src="images/gallery-1.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b>Big photo</b><small>images/gallery-1.jpg · 900×900</small></span></div><figcaption>caption here</figcaption></figure>
+      <figure class="rv" style="--d:.1s"><div class="ph "><img class="phimg" src="images/gallery-2.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b>Photo</b><small>images/gallery-2.jpg · 700×420</small></span></div><figcaption>caption here</figcaption></figure>
+      <figure class="rv" style="--d:.2s"><div class="ph "><img class="phimg" src="images/gallery-3.jpg" alt="" onerror="this.remove()"><span class="phl"><i class="fa-regular fa-image"></i><b>Photo</b><small>images/gallery-3.jpg · 700×420</small></span></div><figcaption>caption here</figcaption></figure>
+    </div>
+  </section>
+
+  <div class="band"><section class="sect" id="how">
+    <h2 class="rv">How it works</h2>
+    <div class="steps2" style="margin-top:34px">
+      <div class="step2 rv"><b>Teacher posts</b><span>Homework or a quiz</span></div>
+      <div class="step2 rv" style="--d:.1s"><b>Students answer</b><span>From any phone</span></div>
+      <div class="step2 rv" style="--d:.2s"><b>Marks appear</b><span>Right away</span></div>
     </div>
   </section></div>
 
-  <section class="sect" id="how">
-    <h2 class="rv">How it works</h2>
-    <p class="sl rv">Three simple steps from homework to marks.</p>
-    <div class="steps">
-      <div class="step rv"><h3>Teacher posts homework</h3><p>Write the task, add images and pick the grades or sections.</p></div>
-      <div class="step rv"><h3>Students submit</h3><p>Each student sees their own homework and submits from any device.</p></div>
-      <div class="step rv"><h3>Mark and export</h3><p>Give marks, then download the full mark sheet as an Excel file.</p></div>
-    </div>
-  </section>
-
   <div class="ctaband">
-    <h2 class="rv">Ready to get started?</h2>
-    <p class="rv">Log in to see your homework and marks.</p>
-    <a class="btn lg rv" id="bandcta" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+    <img class="ctabg" src="images/cta-bg.jpg" alt="" onerror="this.remove()">
+    <h2 class="rv">Ready when you are</h2>
+    <a class="btn lg rv" id="bandcta" href="login.html" style="margin-top:16px;--d:.1s"><i class="fa-solid fa-right-to-bracket"></i> Let's go</a>
+    <span class="hand rv" style="--d:.2s">see you inside!</span>
   </div>
 </div>
-<div class="foot"><b>MCG IT Grid</b> · ICT Learning Management System</div>
+<script>document.body.insertAdjacentHTML("beforeend", footHtml)</script>
 <script>
 $('themeslot').innerHTML = themeBtn(); syncTheme();
 if (token && me) {
   const d = '<i class="fa-solid fa-gauge"></i> Dashboard';
   ['navcta', 'herocta', 'bandcta'].forEach(i => { $(i).href = home(); $(i).innerHTML = d; });
+}
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(hover:hover)').matches) {
+  const t = document.getElementById('tilt'), h = document.querySelector('.hero');
+  h.addEventListener('pointermove', e => { const r = h.getBoundingClientRect(); t.style.setProperty('--ry', ((e.clientX - r.left) / r.width - .5) * 10 + 'deg'); t.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - .5)) * 8 + 'deg'); });
+  h.addEventListener('pointerleave', () => { t.style.setProperty('--rx', '0deg'); t.style.setProperty('--ry', '0deg'); });
 }
 reveal();
 </script></body></html>
