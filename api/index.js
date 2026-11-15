@@ -379,6 +379,117 @@ Object.assign(A, {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Class chat (one group for everyone)   data/chat.json = last 400 messages
+//   - everyone can ask, everyone can answer (reply), teachers can delete anything
+//   - every message stores the sender's name / role / grade
+//   - bad words, links, e-mails and phone numbers are blocked on the server
+//   - reads use an ETag cache so polling does not burn the GitHub rate limit
+// ---------------------------------------------------------------------------
+const CHAT_MAX = 400, CHAT_SHOW = 150, CHAT_LEN = 500, CHAT_GAP_MS = 3000;
+const chatCache = { etag: null, data: null, at: 0 };
+
+async function readChat() {
+  const now = Date.now();
+  if (chatCache.data && now - chatCache.at < 3000) return chatCache.data;
+  const h = chatCache.etag ? { ...H, 'If-None-Match': chatCache.etag } : H;
+  const r = await fetch(url('chat'), { headers: h });
+  if (r.status === 304 && chatCache.data) { chatCache.at = now; return chatCache.data; }
+  if (r.status === 404) { chatCache.data = []; chatCache.etag = null; chatCache.at = now; return chatCache.data; }
+  if (!r.ok) { console.error('GitHub chat read failed', r.status); throw cfg(r.status); }
+  const j = await r.json();
+  chatCache.data = JSON.parse(Buffer.from(j.content, 'base64').toString('utf8'));
+  chatCache.etag = r.headers.get('etag'); chatCache.at = now;
+  return chatCache.data;
+}
+
+// ---- bad word filter --------------------------------------------------------
+// Edit these lists to add or remove words. All lowercase.
+// WORDS  = blocked only as a whole word (so "class" or "assistant" are safe)
+// PARTS  = blocked anywhere inside a word
+// SINHALA = blocked anywhere in the text (Sinhala script)
+const BAD_WORDS = new Set([
+  'ass', 'arse', 'dick', 'cock', 'pussy', 'tits', 'boobs', 'sex', 'sexy', 'nude', 'nudes', 'slut', 'whore', 'bitch', 'cunt', 'fag',
+  'idiot', 'moron', 'loser', 'retard', 'retarded', 'dumbass', 'wtf', 'stfu',
+  'hutta', 'hutto', 'huththa', 'huththo', 'hutti', 'huththi', 'hukanna', 'hukapan', 'pakaya', 'pakayo', 'ponna', 'ponnaya', 'wesi', 'wesiya', 'modaya', 'gonaya'
+]);
+const BAD_PARTS = [
+  'fuck', 'shit', 'bitch', 'bastard', 'asshole', 'whore', 'slut', 'nigg', 'faggot', 'dickhead', 'cocksuck', 'pussy', 'blowjob', 'handjob', 'masturbat', 'porn',
+  'huththa', 'hukanaw', 'hukapan', 'pakaya', 'ponnaya', 'wesiya'
+];
+const BAD_SINHALA = ['හුත්ත', 'හුත්ති', 'පකය', 'පොන්න', 'වේසි', 'වෙසි', 'හුකන', 'හුකප'];
+const LEET = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', '@': 'a', $: 's', '!': 'i', '|': 'i', '+': 't' };
+
+function cleanChat(v) {
+  return String(v ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u200B-\u200F\u202A-\u202E\uFEFF]/g, '')
+    .replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim().slice(0, CHAT_LEN);
+}
+
+function chatBlocked(text) {
+  const raw = text.normalize('NFKC');
+  if (/(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|lk|io|me|xyz|co|info|ly|gg|tv|app|link)\b)/i.test(raw)) return 'Links are not allowed in the chat.';
+  if (/[\w.+-]+@[\w-]+\.[\w.]+/.test(raw)) return 'Please do not share e-mail addresses in the chat.';
+  if (/(?:\+?\d[\s().-]*){9,}/.test(raw)) return 'Please do not share phone numbers in the chat.';
+  const rude = 'Please keep the chat kind and respectful. That message was not sent.';
+  const si = raw.replace(/[\u200B-\u200D]/g, '');
+  if (BAD_SINHALA.some(w => si.includes(w))) return rude;
+  const base = raw.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase().replace(/[013457@$!|+]/g, c => LEET[c]);
+  const toks = base.split(/[^a-z]+/).filter(Boolean), merged = [];
+  for (let i = 0; i < toks.length; i++) {          // "f u c k" -> "fuck"
+    if (toks[i].length === 1) { let j = i, w = ''; while (j < toks.length && toks[j].length === 1) w += toks[j++]; if (w.length > 1) { merged.push(w); i = j - 1; continue; } }
+    merged.push(toks[i]);
+  }
+  for (const t of merged) {
+    for (const c of [t, t.replace(/(.)\1{2,}/g, '$1$1'), t.replace(/(.)\1{2,}/g, '$1'), t.replace(/(.)\1+/g, '$1')]) {
+      if (BAD_WORDS.has(c) && c.length > 2) return rude;
+      if (c.length > 3 && BAD_PARTS.some(p => c.includes(p))) return rude;
+    }
+  }
+  const glued = merged.join('');                    // "fu ck" / "f.u.c.k"
+  if (BAD_PARTS.some(p => p.length > 4 && glued.includes(p))) return rude;
+  return null;
+}
+
+Object.assign(A, {
+  async chatList(b, me) {
+    const list = await readChat();
+    return { messages: list.slice(-CHAT_SHOW), me: me.id };
+  },
+  async chatSend(b, me) {
+    if (isTemp(me)) fail('Temp account is view-only');
+    const text = cleanChat(b.text);
+    if (!text) fail('Type a message first');
+    const why = chatBlocked(text); if (why) fail(why);
+    const { data: users } = await read('users');
+    const u = users.find(x => x.id === me.id); if (!u) fail('Account not found', 401);
+    const msg = await update('chat', list => {
+      const now = Date.now();
+      let last = null; for (let i = list.length - 1; i >= 0; i--) if (list[i].userId === u.id) { last = list[i]; break; }
+      if (last && now - Date.parse(last.created) < CHAT_GAP_MS) fail('Slow down a little, wait a few seconds');
+      if (list.some(m => m.userId === u.id && m.text === text && now - Date.parse(m.created) < 60000)) fail('You already sent that');
+      let reply = null;
+      if (b.replyTo) { const o = list.find(m => m.id === str(b.replyTo, 20)); if (o) reply = { id: o.id, name: o.name, role: o.role, text: str(o.text, 90) }; }
+      const m = { id: crypto.randomUUID().slice(0, 12), userId: u.id, name: u.name, role: u.role, grade: u.role === 'student' ? u.grade : '', text, reply, created: new Date().toISOString() };
+      list.push(m);
+      if (list.length > CHAT_MAX) list.splice(0, list.length - CHAT_MAX);
+      return m;
+    });
+    chatCache.at = 0;
+    return { message: msg };
+  },
+  async chatDelete(b, me) {
+    if (isTemp(me)) fail('Temp account is view-only');
+    await update('chat', list => {
+      const i = list.findIndex(m => m.id === str(b.id, 20)); if (i < 0) fail('Message not found', 404);
+      if (me.role !== 'teacher' && list[i].userId !== me.id) fail('You can only delete your own messages', 403);
+      const id = list[i].id; list.splice(i, 1);
+      list.forEach(m => { if (m.reply && m.reply.id === id) m.reply.text = '(deleted message)'; });
+    });
+    chatCache.at = 0;
+    return { ok: true };
+  }
+});
+
 async function diagnose() {
   const env = { GITHUB_TOKEN: !!TOKEN, GITHUB_REPO: !!REPO, TEACHER_CODE: !!setting('TEACHER_CODE') };
   const out = { status: 'api is running', node: process.version, env };
