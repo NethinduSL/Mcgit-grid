@@ -64,7 +64,7 @@ const str = (v, n) => String(v ?? '').slice(0, n);
 const PUBLIC = ['register', 'login'];
 const TEMP = { id: 'temp-nt', email: 'nt', name: 'NT (temp)', grade: 'Temp', role: 'student' };
 const isTemp = me => me && me.id === TEMP.id;
-const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade', 'students', 'studentWork', 'marksSheet'];
+const TEACHER = ['createHomework', 'deleteHomework', 'submissions', 'grade', 'students', 'studentWork', 'marksSheet', 'createPoll', 'deletePoll', 'pollResults', 'resetResponse'];
 const IMG_RE = /^images\/[\w-]+\.(jpg|png|webp)$/;
 const cleanImgs = a => (Array.isArray(a) ? a : []).filter(p => typeof p === 'string' && IMG_RE.test(p)).slice(0, 5);
 const gradeKey = g => String(g || '').toUpperCase().replace(/\s+/g, '').replace(/^GRADE/, '');
@@ -212,6 +212,172 @@ const A = {
     return { ok: true };
   }
 };
+
+// ---------------------------------------------------------------------------
+// Polls & quizzes
+//   polls     = data/polls.json      (questions + correct answers, teacher side)
+//   responses = data/responses.json  (one per student per poll)
+// Correct answers never leave the server until a student has submitted.
+// ---------------------------------------------------------------------------
+const QTYPES = ['single', 'multi', 'tf', 'short', 'opinion'];
+const normText = v => String(v ?? '').toLowerCase().trim().replace(/\s+/g, ' ');
+const pollClosed = p => !!p.due && new Date(p.due + 'T23:59:59+05:30') < new Date();   // closes at the end of the due day (Sri Lanka time)
+const hideKey = p => ({ ...p, questions: p.questions.map(({ correct, accepted, ...q }) => q) });
+
+function cleanQuestions(arr) {
+  if (!Array.isArray(arr) || !arr.length) fail('Add at least one question');
+  if (arr.length > 30) fail('A poll can have up to 30 questions');
+  return arr.map((q, n) => {
+    const no = 'Question ' + (n + 1);
+    q = q && typeof q === 'object' ? q : {};
+    if (!QTYPES.includes(q.type)) fail(no + ': unknown question type');
+    const text = str(q.text, 500).trim();
+    if (!text) fail(no + ' needs some text');
+    const out = { id: crypto.randomUUID().slice(0, 8), type: q.type, text };
+    const pts = Number(q.points);
+    out.points = q.type === 'opinion' ? 0 : (q.points === '' || q.points == null || !isFinite(pts) ? 1 : Math.max(0, Math.min(100, pts)));
+    if (q.type === 'single' || q.type === 'multi' || q.type === 'opinion') {
+      const options = (Array.isArray(q.options) ? q.options : []).map(o => str(o, 200).trim());
+      if (options.length < 2 || options.length > 8) fail(no + ' needs 2 to 8 options');
+      if (options.some(o => !o)) fail(no + ' has an empty option. Fill it in or remove it');
+      out.options = options;
+      if (q.type !== 'opinion') {
+        const c = [...new Set((Array.isArray(q.correct) ? q.correct : []).map(Number))]
+          .filter(i => Number.isInteger(i) && i >= 0 && i < options.length).sort((a, b) => a - b);
+        if (q.type === 'single' && c.length !== 1) fail(no + ': tick the correct answer');
+        if (q.type === 'multi' && !c.length) fail(no + ': tick at least one correct answer');
+        out.correct = c;
+      }
+    } else if (q.type === 'tf') {
+      const c = Array.isArray(q.correct) ? Number(q.correct[0]) : NaN;
+      if (c !== 0 && c !== 1) fail(no + ': choose True or False as the correct answer');
+      out.options = ['True', 'False']; out.correct = [c];
+    } else if (q.type === 'short') {
+      const acc = [...new Set((Array.isArray(q.accepted) ? q.accepted : []).map(a => str(a, 200).trim()).filter(Boolean))].slice(0, 10);
+      if (!acc.length) fail(no + ': add at least one accepted answer');
+      out.accepted = acc;
+    }
+    return out;
+  });
+}
+
+function cleanAnswers(poll, raw) {
+  const r = raw && typeof raw === 'object' ? raw : {}, ans = {};
+  for (const q of poll.questions) {
+    const v = r[q.id];
+    if (q.type === 'short') { const t = str(v, 200).trim(); if (t) ans[q.id] = t; }
+    else if (q.type === 'multi') {
+      const a = [...new Set((Array.isArray(v) ? v : []).map(Number))].filter(i => Number.isInteger(i) && i >= 0 && i < q.options.length).sort((x, y) => x - y);
+      if (a.length) ans[q.id] = a;
+    } else {
+      const n = v === '' || v == null ? NaN : Number(v);
+      if (Number.isInteger(n) && n >= 0 && n < q.options.length) ans[q.id] = n;
+    }
+  }
+  return ans;
+}
+
+// true / false, or null when the question has no right answer (opinion)
+function markQ(q, a) {
+  if (q.type === 'opinion') return null;
+  if (a == null || a === '' || (Array.isArray(a) && !a.length)) return false;
+  if (q.type === 'single' || q.type === 'tf') return Number(a) === q.correct[0];
+  if (q.type === 'multi') return Array.isArray(a) && a.length === q.correct.length && a.every((v, i) => v === q.correct[i]);
+  if (q.type === 'short') return q.accepted.some(x => normText(x) === normText(a));
+  return false;
+}
+
+// key = include per-question ticks and the right answers (only when the teacher allows it)
+function review(p, r, key) {
+  let score = 0, total = 0;
+  const items = p.questions.map(q => {
+    const a = r.answers[q.id], ok = markQ(q, a);
+    if (ok !== null) { total += q.points; if (ok) score += q.points; }
+    return { id: q.id, yours: a ?? null, ok, earned: ok ? q.points : 0, right: q.type === 'short' ? q.accepted : q.correct || null };
+  });
+  return { score, total, items: key ? items : [] };
+}
+
+Object.assign(A, {
+  async createPoll(b, me) {
+    const title = str(b.title, 150).trim();
+    if (!title) fail('Title required');
+    const questions = cleanQuestions(b.questions);
+    const due = /^\d{4}-\d{2}-\d{2}$/.test(str(b.due, 10)) ? b.due : '';
+    await update('polls', list => list.push({
+      id: crypto.randomUUID(), title, description: str(b.description, 1000), due,
+      targets: cleanTargets(b.targets), showAnswers: b.showAnswers !== false,
+      questions, by: me.id, created: new Date().toISOString()
+    }));
+    return { ok: true };
+  },
+  async deletePoll(b) {
+    await update('polls', l => { const i = l.findIndex(x => x.id === b.id); if (i >= 0) l.splice(i, 1); });
+    await update('responses', l => { for (let i = l.length - 1; i >= 0; i--) if (l[i].pollId === b.id) l.splice(i, 1); });
+    return { ok: true };
+  },
+  async polls(b, me) {
+    const student = me.role === 'student' && !isTemp(me);
+    const [{ data: polls }, { data: resps }, { data: users }] = await Promise.all([
+      read('polls'), read('responses'), student ? read('users') : Promise.resolve({ data: [] })
+    ]);
+    if (me.role === 'teacher') {
+      return { polls: polls.slice().reverse().map(p => ({ ...p, responses: resps.filter(r => r.pollId === p.id).length })) };
+    }
+    const u = users.find(x => x.id === me.id);
+    const list = isTemp(me) ? polls : polls.filter(p => sees(p, u && u.grade));
+    return {
+      polls: list.slice().reverse().map(p => {
+        const r = resps.find(x => x.pollId === p.id && x.studentId === me.id);
+        return { ...hideKey(p), closed: pollClosed(p), done: r ? { submittedAt: r.submittedAt, answers: r.answers, ...review(p, r, p.showAnswers) } : null };
+      })
+    };
+  },
+  async submitPoll(b, me) {
+    if (isTemp(me)) fail('Temp account is view-only');
+    if (me.role !== 'student') fail('Students only', 403);
+    const [{ data: polls }, { data: users }] = await Promise.all([read('polls'), read('users')]);
+    const p = polls.find(x => x.id === b.pollId); if (!p) fail('Poll not found', 404);
+    const u = users.find(x => x.id === me.id); if (!u) fail('Account not found', 401);
+    if (!sees(p, u.grade)) fail('This poll is not for your class', 403);
+    if (pollClosed(p)) fail('This poll is closed');
+    const answers = cleanAnswers(p, b.answers);
+    if (!Object.keys(answers).length) fail('Answer at least one question');
+    const rec = await update('responses', list => {
+      if (list.some(r => r.pollId === p.id && r.studentId === me.id)) fail('You have already submitted this poll');
+      const r = { id: crypto.randomUUID(), pollId: p.id, studentId: me.id, answers, submittedAt: new Date().toISOString() };
+      list.push(r); return r;
+    });
+    return { done: { submittedAt: rec.submittedAt, answers, ...review(p, rec, p.showAnswers) } };
+  },
+  async pollResults(b) {
+    const [{ data: polls }, { data: resps }, { data: users }] = await Promise.all([read('polls'), read('responses'), read('users')]);
+    const p = polls.find(x => x.id === b.pollId); if (!p) fail('Poll not found', 404);
+    const rs = resps.filter(r => r.pollId === p.id);
+    const rows = rs.map(r => {
+      const u = users.find(x => x.id === r.studentId) || {}, v = review(p, r, true);
+      return { id: r.id, name: u.name || 'Unknown', grade: u.grade || '', no: u.no || '', submittedAt: r.submittedAt, score: v.score, total: v.total, items: v.items };
+    });
+    const done = new Set(rs.map(r => r.studentId));
+    const missing = users.filter(u => u.role === 'student' && sees(p, u.grade) && !done.has(u.id)).map(u => ({ name: u.name, grade: u.grade }));
+    const stats = p.questions.map(q => {
+      const count = q.options ? q.options.map(() => 0) : null;
+      let answered = 0, right = 0;
+      for (const r of rs) {
+        const a = r.answers[q.id]; if (a == null) continue;
+        answered++;
+        if (count) (Array.isArray(a) ? a : [a]).forEach(i => { if (count[i] != null) count[i]++; });
+        if (markQ(q, a) === true) right++;
+      }
+      return { id: q.id, answered, right, count };
+    });
+    return { poll: p, rows, missing, stats };
+  },
+  async resetResponse(b) {
+    await update('responses', l => { const i = l.findIndex(x => x.id === b.id); if (i < 0) fail('Not found', 404); l.splice(i, 1); });
+    return { ok: true };
+  }
+});
 
 async function diagnose() {
   const env = { GITHUB_TOKEN: !!TOKEN, GITHUB_REPO: !!REPO, TEACHER_CODE: !!setting('TEACHER_CODE') };
