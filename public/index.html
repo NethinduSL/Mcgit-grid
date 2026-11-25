@@ -639,6 +639,107 @@ function reveal() {
     </div>
   </section></div>
 
+
+
+
+
+
+<div class="wrap" style="margin-top:0">
+    <section class="sect" id="faq">
+      <h2 class="rv"><i class="fa-solid fa-circle-question" style="color:var(--y2)"></i> Student Help &amp; FAQs</h2>
+      <p class="sub rv" style="margin-bottom:18px">Search common issues or ask AI for a clear, quick answer.</p>
+      <div class="card" style="padding:20px">
+        <form id="mcgFaqForm" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="position:relative;flex:1;min-width:220px">
+            <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--g);font-size:13px"></i>
+            <input id="mcgFaqSearch" type="text" placeholder="Search homework, marks, quiz, password, chat..." style="padding-left:36px">
+          </div>
+          <button class="btn" id="mcgFaqAiBtn" type="submit"><i class="fa-solid fa-robot"></i> Ask AI</button>
+        </form>
+        <div id="mcgFaqAiBox" style="display:none;padding:12px 14px;border-radius:12px;background:var(--yt);border:1px solid var(--yl);margin-bottom:14px;font-size:13.5px;line-height:1.55"></div>
+        <div id="mcgFaqList"></div>
+      </div>
+    </section>
+  </div>
+  <script>
+  (function () {
+    var FAQS = [
+      { c: 'Homework', q: 'Homework එකක් submit කරන්නේ කොහොමද? (How do I submit homework?)', a: 'Home පිටුවට ගොස් අදාළ homework කාඩ් එක open කරන්න. ඔබේ පිළිතුර type කර හෝ "Add image" මගින් පින්තූර 5ක් දක්වා එක් කර Submit ඔබන්න.' },
+      { c: 'Quizzes', q: 'Polls & Quizzes වල ලකුණු (Marks) එවෙලේම පෙන්නනවද?', a: 'ඔව්! Polls & Quizzes පිටුවේ quiz එක submit කළ වහාම ඔබේ ලකුණු සහ ප්‍රතිශතය (%) එවෙලේම තිරයේ පෙන්වයි.' },
+      { c: 'Class Chat', q: 'Class Chat එකේ links හෝ phone numbers යවන්න බැරි ඇයි?', a: 'සිසුන්ගේ ආරක්ෂාව සඳහා Class Chat තුළ website links, email ලිපින, දුරකථන අංක සහ අශිෂ්ට වචන ස්වයංක්‍රීයව අවහිර කර ඇත.' },
+      { c: 'Account', q: 'Grade, Section හෝ Password වෙනස් කරන්නේ කොහොමද?', a: 'ඉහළ menu එකෙන් Profile පිටුවට ගොස් Details යටතේ Grade (6-8), Section (A-G) සහ Class Number වෙනස් කර Save කරන්න. Password එකද එතැනින්ම මාරු කළ හැක.' },
+      { c: 'Theme & Language', q: 'සිංහල භාෂාවට හෝ Dark Mode වලට මාරු වෙන්නේ කොහොමද?', a: 'ඉහළ navigation bar එකේ ඇති "EN / සිං" බොත්තමෙන් භාෂාවත්, සඳ/හිරු අයිකනය මගින් Light හා Dark mode අතරත් මාරු විය හැක.' }
+    ];
+    var list = document.getElementById('mcgFaqList');
+    var inp = document.getElementById('mcgFaqSearch');
+    var form = document.getElementById('mcgFaqForm');
+    var aiBox = document.getElementById('mcgFaqAiBox');
+    var aiBtn = document.getElementById('mcgFaqAiBtn');
+
+    function draw(term) {
+      var q = (term || '').trim().toLowerCase();
+      while (list.firstChild) list.removeChild(list.firstChild);
+      var matched = FAQS.filter(function (f) {
+        return !q || (f.q + ' ' + f.a + ' ' + f.c).toLowerCase().indexOf(q) !== -1;
+      });
+      if (!matched.length) {
+        var msg = document.createElement('p');
+        msg.style.cssText = 'color:var(--g);margin:8px 0 0;font-size:13px;';
+        msg.textContent = 'ගැලපෙන FAQ හමු නොවීය — "Ask AI" බොත්තම ඔබා කෙලින්ම AI පිළිතුරක් ලබාගන්න.';
+        list.appendChild(msg);
+        return;
+      }
+      matched.forEach(function (f, i) {
+        var det = document.createElement('details');
+        det.style.cssText = 'border-top:1px solid var(--line);padding:12px 0;';
+        if (i === 0 || q) det.open = true;
+        var sum = document.createElement('summary');
+        sum.style.cssText = 'cursor:pointer;font-weight:600;font-size:14px;list-style:none;';
+        sum.textContent = f.c + ' · ' + f.q;
+        var ans = document.createElement('p');
+        ans.style.cssText = 'margin:8px 0 0;color:var(--g);font-size:13.5px;line-height:1.6;';
+        ans.textContent = f.a;
+        det.appendChild(sum);
+        det.appendChild(ans);
+        list.appendChild(det);
+      });
+    }
+
+    draw('');
+    inp.addEventListener('input', function () { draw(inp.value); });
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var q = inp.value.trim();
+      if (!q || aiBtn.disabled) return;
+      var lang = 'si';
+      try { if (localStorage.getItem('lms_lang') === 'en') lang = 'en'; } catch (err) {}
+      aiBtn.disabled = true;
+      aiBox.style.display = 'block';
+      aiBox.textContent = lang === 'si' ? 'පිළිතුර සොයමින්...' : 'Searching...';
+      try {
+        var r = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'faq', replyLang: lang, query: q })
+        });
+        var j = await r.json();
+        aiBox.textContent = j.reply || j.error || 'No answer found.';
+      } catch (err) {
+        aiBox.textContent = 'Connection error. Please try again.';
+      } finally {
+        aiBtn.disabled = false;
+      }
+    });
+  })();
+  </script>
+
+
+
+
+
+
+
+  
   <div class="ctaband">
     <img class="crest lgc" src="logos/favicon.svg" alt="School logo" onerror="this.remove()">
     <img class="ctabg" src="images/cta-bg.jpg" alt="" onerror="this.remove()">
