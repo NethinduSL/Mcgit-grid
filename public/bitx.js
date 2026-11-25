@@ -35,7 +35,7 @@
 })();
 
 
-/* MCG ICT Grid - Floating AI Student Helper (Auto-Language + Rich Highlights) */
+/* MCG ICT Grid - Floating AI Student Helper (English UI, Auto-Language Replies) */
 (function () {
   function mountMcgAiHelper() {
     if (document.getElementById('mcg-ai-helper')) return;
@@ -115,7 +115,7 @@
     ttl.textContent = 'Grid Helper';
     var sub = document.createElement('div');
     sub.className = 'mcg-ai-sub';
-    sub.textContent = 'සිංහල & English';
+    sub.textContent = 'Student Assistant';
     titleWrap.appendChild(ttl);
     titleWrap.appendChild(sub);
     idBox.appendChild(img);
@@ -154,7 +154,7 @@
     var inp = document.createElement('input');
     inp.type = 'text';
     inp.className = 'mcg-ai-inp';
-    inp.placeholder = 'සිංහලෙන් හෝ English වලින් අසන්න...';
+    inp.placeholder = 'Ask a question...';
     var sendBtn = document.createElement('button');
     sendBtn.type = 'submit';
     sendBtn.className = 'btn sm';
@@ -197,12 +197,12 @@
       return b;
     }
 
-    addBubble('assistant', 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework, Quizzes හෝ ඕනෑම විෂය කරුණක් **සිංහලෙන් හෝ English වලින්** අසන්න!');
+    addBubble('assistant', 'Hello! I am the **MCG ICT Grid** AI Helper. Ask me about homework, quizzes, marks, or any school subject — I reply in the language you ask in!');
 
     [
-      'Homework එකට photo දාන්නේ කොහොමද?',
+      'How do I upload homework photos?',
       'Where do I see my quiz marks?',
-      'Input devices මොනවාද?'
+      'What are input and output devices?'
     ].forEach(function (q) {
       var chip = document.createElement('button');
       chip.type = 'button';
@@ -220,7 +220,7 @@
       addBubble('user', q);
       inp.value = '';
       sendBtn.disabled = true;
-      var wait = addBubble('assistant', 'පිළිතුර සකසමින්...');
+      var wait = addBubble('assistant', 'Thinking...');
 
       try {
         var r = await fetch('/api/ai', {
@@ -229,7 +229,7 @@
           body: JSON.stringify({ mode: 'chat', messages: history })
         });
         var j = await r.json();
-        if (!r.ok) throw new Error(j.error || 'Error');
+        if (!r.ok) throw new Error(j.error || 'Request failed');
         renderRich(wait, j.reply);
         history.push({ role: 'assistant', text: j.reply });
       } catch (e) {
