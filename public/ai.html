@@ -79,8 +79,8 @@
   <div class="wrap">
     <div class="toprow">
       <div>
-        <h1 class="title"><i class="fa-solid fa-robot"></i> AI ශිෂ්‍ය සහායක · Student Helper</h1>
-        <p class="sub">සිංහලෙන් හෝ English වලින් අසන්න — අහන භාෂාවෙන්ම පිළිතුරු ලැබේ (විෂය කරුණු හා සයිට් උදව්).</p>
+        <h1 class="title"><i class="fa-solid fa-robot"></i> AI Student Helper</h1>
+        <p class="sub">Ask about homework, quizzes, ICT lessons, or any school subject in Sinhala or English.</p>
       </div>
       <button type="button" class="btn ghost" id="clearBtn"><i class="fa-solid fa-rotate-left"></i> Clear</button>
     </div>
@@ -89,7 +89,7 @@
       <div class="msgs" id="msgs"></div>
       <div class="chips" id="chips"></div>
       <form class="composer" id="form">
-        <input id="inp" type="text" maxlength="1000" placeholder="සිංහලෙන් හෝ English වලින් ප්‍රශ්නය ලියන්න..." autocomplete="off">
+        <input id="inp" type="text" maxlength="1000" placeholder="Ask a question in English or Sinhala..." autocomplete="off">
         <button class="btn" id="sendBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>
       </form>
     </div>
@@ -118,12 +118,12 @@
         syncThemeIc();
       };
 
-      var WELCOME = 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework, Quizzes, ICT හෝ ඕනෑම පාසල් විෂය ප්‍රශ්නයක් **සිංහලෙන් හෝ English වලින්** මගෙන් අහන්න — ඔබ අහන භාෂාවෙන්ම මම උත්තර දෙන්නම්!';
+      var WELCOME = 'Hello! I am the **MCG ICT Grid** AI Helper. Ask me how to submit homework, check quiz marks, or ask any school subject question — I will reply in the language you write in.';
       var STARTERS = [
-        'Homework එකට photo upload කරන්නේ කොහොමද?',
-        '6 ශ්‍රේණියේ Input Devices මොනවාද?',
+        'How do I upload photos for homework?',
         'Where do I see my quiz marks?',
-        'What is CPU in a computer?'
+        'Explain Input vs Output devices simply',
+        'Why are links blocked in Class Chat?'
       ];
 
       var msgsEl = document.getElementById('msgs');
@@ -138,8 +138,7 @@
         var re = /(\*\*[^*]+\*\*|`[^`]+`)/g;
         lines.forEach(function (line, i) {
           if (i > 0) el.appendChild(document.createElement('br'));
-          var clean = line.replace(/^\s*[-*]\s+/, '• ');
-          clean.split(re).forEach(function (p) {
+          line.replace(/^\s*[-*]\s+/, '• ').split(re).forEach(function (p) {
             if (p.indexOf('**') === 0 && p.lastIndexOf('**') === p.length - 2 && p.length > 4) {
               var s = document.createElement('strong');
               s.className = 'hl';
@@ -194,7 +193,7 @@
         addBubble('user', q);
         inp.value = '';
         sendBtn.disabled = true;
-        var wait = addBubble('assistant', 'පිළිතුර සකසමින්...');
+        var wait = addBubble('assistant', 'Thinking...');
         try {
           var r = await fetch('/api/ai', {
             method: 'POST',
@@ -202,7 +201,7 @@
             body: JSON.stringify({ mode: 'chat', messages: history })
           });
           var j = await r.json();
-          if (!r.ok) throw new Error(j.error || 'Error');
+          if (!r.ok) throw new Error(j.error || 'Request failed');
           renderRich(wait, j.reply);
           history.push({ role: 'assistant', text: j.reply });
         } catch (e) {
