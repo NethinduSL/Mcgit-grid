@@ -34,52 +34,17 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.body.classList.remove('side-open'); });
 })();
 
-/* MCG ICT Grid - Floating AI Student Helper (Rich Highlights + Dual Language) */
+
+/* MCG ICT Grid - Floating AI Student Helper (Auto-Language + Rich Highlights) */
 (function () {
   function mountMcgAiHelper() {
     if (document.getElementById('mcg-ai-helper')) return;
     if (location.pathname.endsWith('/ai.html')) return;
 
-    var lang = 'si';
-    try {
-      if (localStorage.getItem('lms_lang') === 'en') lang = 'en';
-    } catch (e) {}
-
-    var COPY = {
-      si: {
-        fab: 'AI සහායක',
-        title: 'Grid Helper',
-        sub: 'සිංහල සහායක',
-        toggle: 'EN',
-        placeholder: 'ඔබේ ගැටළුව ලියන්න...',
-        thinking: 'පිළිතුර සකසමින්...',
-        welcome: 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework, Quizzes, ලකුණු හෝ ICT පාඩම් ගැන ඕනෑම දෙයක් මගෙන් අහන්න.',
-        starters: [
-          'Homework එකට photo දාන්නේ කොහොමද?',
-          'Quiz ලකුණු බලන්නේ කොහොමද?',
-          'Class Chat එකේ links යවන්න බැරි ඇයි?'
-        ]
-      },
-      en: {
-        fab: 'AI Helper',
-        title: 'Grid Helper',
-        sub: 'English Mode',
-        toggle: 'සිං',
-        placeholder: 'Ask a question...',
-        thinking: 'Drafting reply...',
-        welcome: 'Hello! I am the **MCG ICT Grid** AI Helper. Ask me anything about homework, quizzes, marks, or ICT lessons.',
-        starters: [
-          'How do I upload homework photos?',
-          'Where do I see my quiz marks?',
-          'Why are links blocked in Class Chat?'
-        ]
-      }
-    };
-
     var st = document.createElement('style');
     st.textContent = [
       '#mcg-ai-helper{position:fixed;right:18px;bottom:18px;z-index:75;display:flex;flex-direction:column;align-items:flex-end;gap:10px;font-family:"Poppins","Noto Sans Sinhala",system-ui,sans-serif;}',
-      '#mcg-ai-box{display:none;width:356px;max-width:calc(100vw - 32px);height:470px;max-height:calc(100vh - 96px);background:var(--card,#fff);color:var(--tx,#121214);border:1px solid var(--line,#e2e2dc);border-radius:var(--r,14px);box-shadow:var(--sh2,0 12px 30px rgba(0,0,0,.18));flex-direction:column;overflow:hidden;animation:pop .22s ease both;}',
+      '#mcg-ai-box{display:none;width:356px;max-width:calc(100vw - 32px);height:465px;max-height:calc(100vh - 96px);background:var(--card,#fff);color:var(--tx,#121214);border:1px solid var(--line,#e2e2dc);border-radius:var(--r,14px);box-shadow:var(--sh2,0 12px 30px rgba(0,0,0,.18));flex-direction:column;overflow:hidden;animation:pop .22s ease both;}',
       '#mcg-ai-box.open{display:flex;}',
       '.mcg-ai-head{padding:12px 14px;background:var(--y,#ffc900);color:#111;display:flex;align-items:center;justify-content:space-between;gap:8px;}',
       '.mcg-ai-id{display:flex;align-items:center;gap:9px;min-width:0;}',
@@ -93,7 +58,7 @@
       '.mcg-ai-msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.55;word-break:break-word;}',
       '.mcg-ai-msg.bot{align-self:flex-start;background:var(--card,#fff);color:var(--tx,#121214);border:1px solid var(--line,#e2e2dc);}',
       '.mcg-ai-msg.usr{align-self:flex-end;background:var(--y,#ffc900);color:#111;font-weight:500;}',
-      '.mcg-ai-hl{background:var(--yt,rgba(255,201,0,.18));color:var(--y2,#b45309);font-weight:700;padding:1px 5px;border-radius:5px;}',
+      '.mcg-ai-hl{background:var(--yt,rgba(255,201,0,.18));color:#92400e;font-weight:700;padding:1px 5px;border-radius:5px;}',
       ':root[data-theme=dark] .mcg-ai-hl{color:var(--y,#ffc900);}',
       '.mcg-ai-code{font-family:"JetBrains Mono",monospace;font-size:11.5px;background:var(--bg2,#ecece7);border:1px solid var(--line,#e2e2dc);padding:1px 5px;border-radius:5px;}',
       '.mcg-ai-chips{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;background:var(--card,#fff);border-top:1px solid var(--line,#e2e2dc);}',
@@ -112,9 +77,7 @@
       var re = /(\*\*[^*]+\*\*|`[^`]+`)/g;
       lines.forEach(function (line, i) {
         if (i > 0) el.appendChild(document.createElement('br'));
-        var clean = line.replace(/^\s*[-*]\s+/, '• ');
-        var parts = clean.split(re);
-        parts.forEach(function (p) {
+        line.replace(/^\s*[-*]\s+/, '• ').split(re).forEach(function (p) {
           if (p.indexOf('**') === 0 && p.lastIndexOf('**') === p.length - 2 && p.length > 4) {
             var s = document.createElement('strong');
             s.className = 'mcg-ai-hl';
@@ -149,8 +112,10 @@
     var titleWrap = document.createElement('div');
     var ttl = document.createElement('div');
     ttl.className = 'mcg-ai-ttl';
+    ttl.textContent = 'Grid Helper';
     var sub = document.createElement('div');
     sub.className = 'mcg-ai-sub';
+    sub.textContent = 'සිංහල & English';
     titleWrap.appendChild(ttl);
     titleWrap.appendChild(sub);
     idBox.appendChild(img);
@@ -166,9 +131,6 @@
     fullIcon.className = 'fa-solid fa-up-right-from-square';
     fullLink.appendChild(fullIcon);
 
-    var langBtn = document.createElement('button');
-    langBtn.type = 'button';
-    langBtn.className = 'mcg-ai-hbtn';
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'mcg-ai-hbtn';
@@ -178,7 +140,6 @@
     closeBtn.appendChild(closeIcon);
 
     acts.appendChild(fullLink);
-    acts.appendChild(langBtn);
     acts.appendChild(closeBtn);
     head.appendChild(idBox);
     head.appendChild(acts);
@@ -193,6 +154,7 @@
     var inp = document.createElement('input');
     inp.type = 'text';
     inp.className = 'mcg-ai-inp';
+    inp.placeholder = 'සිංහලෙන් හෝ English වලින් අසන්න...';
     var sendBtn = document.createElement('button');
     sendBtn.type = 'submit';
     sendBtn.className = 'btn sm';
@@ -215,6 +177,7 @@
     var fabIcon = document.createElement('i');
     fabIcon.className = 'fa-solid fa-robot';
     var fabText = document.createElement('span');
+    fabText.textContent = 'AI Helper';
     fab.appendChild(fabIcon);
     fab.appendChild(fabText);
 
@@ -234,38 +197,20 @@
       return b;
     }
 
-    function applyLang(reset) {
-      var c = COPY[lang];
-      fabText.textContent = c.fab;
-      ttl.textContent = c.title;
-      sub.textContent = c.sub;
-      langBtn.textContent = c.toggle;
-      inp.placeholder = c.placeholder;
+    addBubble('assistant', 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework, Quizzes හෝ ඕනෑම විෂය කරුණක් **සිංහලෙන් හෝ English වලින්** අසන්න!');
 
-      if (reset || history.length === 0) {
-        while (msgs.firstChild) msgs.removeChild(msgs.firstChild);
-        history = [{ role: 'assistant', text: c.welcome }];
-        addBubble('assistant', c.welcome);
-        chips.style.display = 'flex';
-      }
-
-      while (chips.firstChild) chips.removeChild(chips.firstChild);
-      c.starters.forEach(function (q) {
-        var chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'mcg-ai-chip';
-        chip.textContent = q;
-        chip.onclick = function () { ask(q); };
-        chips.appendChild(chip);
-      });
-    }
-
-    applyLang(true);
-
-    langBtn.onclick = function () {
-      lang = lang === 'si' ? 'en' : 'si';
-      applyLang(history.length <= 1);
-    };
+    [
+      'Homework එකට photo දාන්නේ කොහොමද?',
+      'Where do I see my quiz marks?',
+      'Input devices මොනවාද?'
+    ].forEach(function (q) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'mcg-ai-chip';
+      chip.textContent = q;
+      chip.onclick = function () { ask(q); };
+      chips.appendChild(chip);
+    });
 
     async function ask(raw) {
       var q = String(raw || '').trim();
@@ -275,13 +220,13 @@
       addBubble('user', q);
       inp.value = '';
       sendBtn.disabled = true;
-      var wait = addBubble('assistant', COPY[lang].thinking);
+      var wait = addBubble('assistant', 'පිළිතුර සකසමින්...');
 
       try {
         var r = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode: 'chat', replyLang: lang, messages: history })
+          body: JSON.stringify({ mode: 'chat', messages: history })
         });
         var j = await r.json();
         if (!r.ok) throw new Error(j.error || 'Error');
@@ -305,4 +250,4 @@
   } else {
     mountMcgAiHelper();
   }
-})();    
+})();
