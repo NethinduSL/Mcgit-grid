@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="bitx.css">
   <link rel="icon" type="image/svg+xml" href="logos/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="logos/favicon-32.png">
   <script>
@@ -22,49 +21,46 @@
   </script>
   <style>
     :root{
-      --y:#ffc900;--y2:#e6b400;--yt:rgba(255,201,0,.14);--yl:rgba(255,201,0,.4);
+      --y:#ffc900;--y2:#e6b400;--yt:rgba(255,201,0,.16);--yl:rgba(255,201,0,.45);
       --bg:#f5f5f2;--bg2:#ecece7;--card:#ffffff;--nav:rgba(255,255,255,.92);--tx:#121214;--g:#5f6168;--line:#e2e2dc;--field:#ffffff;
-      --sh:0 1px 2px rgba(16,16,20,.05),0 6px 20px rgba(16,16,20,.06);--sh2:0 2px 4px rgba(16,16,20,.06),0 12px 30px rgba(16,16,20,.1);--r:14px
+      --sh:0 1px 2px rgba(16,16,20,.05),0 6px 20px rgba(16,16,20,.06);--r:14px
     }
     :root[data-theme=dark]{
-      --yt:rgba(255,201,0,.13);--yl:rgba(255,201,0,.38);
+      --yt:rgba(255,201,0,.16);--yl:rgba(255,201,0,.42);
       --bg:#0d0d0e;--bg2:#141416;--card:#171719;--nav:rgba(15,15,16,.92);--tx:#f3f3f1;--g:#a1a3aa;--line:#2a2a2e;--field:#0f0f11;
-      --sh:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);--sh2:0 2px 4px rgba(0,0,0,.5),0 12px 30px rgba(0,0,0,.45)
+      --sh:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3)
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:'Poppins','Noto Sans Sinhala',system-ui,sans-serif;font-size:14px;line-height:1.55;color:var(--tx);background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
-    .nav{position:sticky;top:0;z-index:30;background:var(--nav);backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid var(--line)}
-    .nav .in{max-width:1080px;margin:auto;display:flex;align-items:center;gap:8px;padding:10px 16px}
+    body{margin:0;font-family:'Poppins','Noto Sans Sinhala',system-ui,sans-serif;font-size:14px;line-height:1.55;color:var(--tx);background:var(--bg);height:100dvh;display:flex;flex-direction:column}
+    .nav{flex:none;background:var(--nav);backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid var(--line)}
+    .nav .in{max-width:980px;margin:auto;display:flex;align-items:center;gap:8px;padding:10px 16px}
     .brand{display:flex;align-items:center;gap:10px;font-weight:700;margin-right:auto;font-size:16px;color:var(--tx);text-decoration:none}
     .brand em{font-style:normal;color:var(--y2)}
     :root[data-theme=dark] .brand em{color:var(--y)}
     .crest{width:34px;height:34px;border-radius:50%;background:#fff;object-fit:contain}
     .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer;display:grid;place-items:center;font-size:14px}
-    .btn{background:var(--y);color:#111;border:1px solid transparent;padding:9px 16px;border-radius:10px;font-weight:600;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;gap:8px;align-items:center;text-decoration:none}
+    .btn{background:var(--y);color:#111;border:1px solid transparent;padding:9px 15px;border-radius:10px;font-weight:600;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;gap:7px;align-items:center;text-decoration:none;white-space:nowrap}
     .btn.ghost{background:var(--card);color:var(--tx);border-color:var(--line)}
     .btn:disabled{opacity:.6;cursor:wait}
-    .wrap{max-width:920px;width:100%;margin:22px auto;padding:0 16px;flex:1;display:flex;flex-direction:column}
-    .toprow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-    .title{display:flex;align-items:center;gap:10px;margin:0;font-size:22px;font-weight:700}
+    .wrap{max-width:980px;width:100%;margin:0 auto;padding:14px 16px 16px;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+    .toprow{flex:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+    .title{display:flex;align-items:center;gap:10px;margin:0;font-size:20px;font-weight:700}
     .title i{color:var(--y2)}
     :root[data-theme=dark] .title i{color:var(--y)}
-    .sub{color:var(--g);margin:4px 0 0;font-size:13px}
-    .seg{display:inline-flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
-    .seg button{border:0;background:none;color:var(--g);font:inherit;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer}
-    .seg button.on{background:var(--y);color:#111}
-    .chatbox{flex:1;min-height:480px;max-height:calc(100vh - 230px);background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
-    .msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
-    .msg{max-width:82%;padding:12px 15px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
+    .sub{color:var(--g);margin:2px 0 0;font-size:12.5px}
+    .chatbox{flex:1;min-height:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+    .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+    .msg{max-width:84%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
     .msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);color:var(--tx)}
     .msg.usr{align-self:flex-end;background:var(--y);color:#111;font-weight:500}
-    .hl{background:var(--yt);color:var(--y2);font-weight:700;padding:1px 6px;border-radius:5px}
+    .hl{background:var(--yt);color:#92400e;font-weight:700;padding:1px 6px;border-radius:5px}
     :root[data-theme=dark] .hl{color:var(--y)}
     .codechip{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:5px}
-    .chips{padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);background:var(--card)}
-    .chip{font:inherit;font-size:12px;padding:7px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--tx);cursor:pointer;text-align:left}
+    .chips{flex:none;padding:10px 14px;display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--line);background:var(--card)}
+    .chip{font:inherit;font-size:12px;padding:6px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--tx);cursor:pointer;text-align:left}
     .chip:hover{border-color:var(--yl);background:var(--yt)}
-    .composer{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);background:var(--card)}
-    .composer input{flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;background:var(--field);color:var(--tx)}
+    .composer{flex:none;display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--card)}
+    .composer input{flex:1;min-width:0;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;background:var(--field);color:var(--tx)}
     .composer input:focus{outline:none;border-color:var(--y)}
   </style>
 </head>
@@ -83,32 +79,24 @@
   <div class="wrap">
     <div class="toprow">
       <div>
-        <h1 class="title"><i class="fa-solid fa-robot"></i> <span id="pageTitle">AI Student Helper</span></h1>
-        <p class="sub" id="pageSub">Ask anything about homework, quizzes, marks, or Grade 6–8 ICT lessons.</p>
+        <h1 class="title"><i class="fa-solid fa-robot"></i> AI ශිෂ්‍ය සහායක · Student Helper</h1>
+        <p class="sub">සිංහලෙන් හෝ English වලින් අසන්න — අහන භාෂාවෙන්ම පිළිතුරු ලැබේ (විෂය කරුණු හා සයිට් උදව්).</p>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="seg" role="group" aria-label="AI language">
-          <button type="button" id="btnSi" class="on">සිංහල</button>
-          <button type="button" id="btnEn">English</button>
-        </div>
-        <button type="button" class="btn ghost" id="clearBtn"><i class="fa-solid fa-rotate-left"></i> <span id="clearLbl">Clear</span></button>
-      </div>
+      <button type="button" class="btn ghost" id="clearBtn"><i class="fa-solid fa-rotate-left"></i> Clear</button>
     </div>
 
     <div class="chatbox">
       <div class="msgs" id="msgs"></div>
       <div class="chips" id="chips"></div>
       <form class="composer" id="form">
-        <input id="inp" type="text" maxlength="1000" placeholder="ඔබේ ප්‍රශ්නය මෙහි ලියන්න..." autocomplete="off">
-        <button class="btn" id="sendBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> <span id="sendLbl">යවන්න</span></button>
+        <input id="inp" type="text" maxlength="1000" placeholder="සිංහලෙන් හෝ English වලින් ප්‍රශ්නය ලියන්න..." autocomplete="off">
+        <button class="btn" id="sendBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>
       </form>
     </div>
   </div>
 
   <script>
     (function () {
-      var lang = 'si';
-      try { if (localStorage.getItem('lms_lang') === 'en') lang = 'en'; } catch (e) {}
       try {
         var me = JSON.parse(localStorage.getItem('lms_user') || 'null');
         if (me) {
@@ -130,38 +118,13 @@
         syncThemeIc();
       };
 
-      var COPY = {
-        si: {
-          title: 'AI ශිෂ්‍ය සහායක',
-          sub: 'Homework, Quizzes, ලකුණු හෝ 6–8 ශ්‍රේණි ICT පාඩම් ගැන ඕනෑම ප්‍රශ්නයක් අසන්න.',
-          placeholder: 'ඔබේ ගැටළුව හෝ ICT ප්‍රශ්නය මෙහි ලියන්න...',
-          send: 'යවන්න',
-          clear: 'අලුතින්',
-          thinking: 'පිළිතුර සකසමින්...',
-          welcome: 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework upload කරන හැටි, Polls & Quizzes, ලකුණු බලන හැටි හෝ ICT පාඩම් ගැන මගෙන් අහන්න.',
-          starters: [
-            'Homework එකට photo upload කරන්නේ කොහොමද?',
-            'Quiz ලකුණු බලන්නේ කොහොමද?',
-            '6 ශ්‍රේණියේ Input Devices මොනවාද?',
-            'Class Chat එකේ නීති මොනවාද?'
-          ]
-        },
-        en: {
-          title: 'AI Student Helper',
-          sub: 'Ask anything about homework, quizzes, marks, or Grade 6–8 ICT lessons.',
-          placeholder: 'Type your question or ICT topic here...',
-          send: 'Send',
-          clear: 'Reset',
-          thinking: 'Drafting reply...',
-          welcome: 'Hello! I am the **MCG ICT Grid** AI Helper. Ask me how to submit homework, check quiz marks, or explain Grade 6–8 ICT concepts.',
-          starters: [
-            'How do I upload photos for homework?',
-            'Where can I see my quiz marks?',
-            'Explain Input vs Output devices simply',
-            'Why are links blocked in Class Chat?'
-          ]
-        }
-      };
+      var WELCOME = 'ආයුබෝවන්! මම **MCG ICT Grid** AI සහායක. Homework, Quizzes, ICT හෝ ඕනෑම පාසල් විෂය ප්‍රශ්නයක් **සිංහලෙන් හෝ English වලින්** මගෙන් අහන්න — ඔබ අහන භාෂාවෙන්ම මම උත්තර දෙන්නම්!';
+      var STARTERS = [
+        'Homework එකට photo upload කරන්නේ කොහොමද?',
+        '6 ශ්‍රේණියේ Input Devices මොනවාද?',
+        'Where do I see my quiz marks?',
+        'What is CPU in a computer?'
+      ];
 
       var msgsEl = document.getElementById('msgs');
       var chipsEl = document.getElementById('chips');
@@ -204,24 +167,13 @@
         return b;
       }
 
-      function applyLang(reset) {
-        var c = COPY[lang];
-        document.getElementById('btnSi').classList.toggle('on', lang === 'si');
-        document.getElementById('btnEn').classList.toggle('on', lang === 'en');
-        document.getElementById('pageTitle').textContent = c.title;
-        document.getElementById('pageSub').textContent = c.sub;
-        document.getElementById('sendLbl').textContent = c.send;
-        document.getElementById('clearLbl').textContent = c.clear;
-        inp.placeholder = c.placeholder;
-
-        if (reset || history.length === 0) {
-          while (msgsEl.firstChild) msgsEl.removeChild(msgsEl.firstChild);
-          history = [{ role: 'assistant', text: c.welcome }];
-          addBubble('assistant', c.welcome);
-          chipsEl.style.display = 'flex';
-        }
+      function resetChat() {
+        history = [];
+        while (msgsEl.firstChild) msgsEl.removeChild(msgsEl.firstChild);
+        addBubble('assistant', WELCOME);
+        chipsEl.style.display = 'flex';
         while (chipsEl.firstChild) chipsEl.removeChild(chipsEl.firstChild);
-        c.starters.forEach(function (q) {
+        STARTERS.forEach(function (q) {
           var b = document.createElement('button');
           b.type = 'button';
           b.className = 'chip';
@@ -231,11 +183,8 @@
         });
       }
 
-      applyLang(true);
-
-      document.getElementById('btnSi').onclick = function () { lang = 'si'; applyLang(history.length <= 1); };
-      document.getElementById('btnEn').onclick = function () { lang = 'en'; applyLang(history.length <= 1); };
-      document.getElementById('clearBtn').onclick = function () { applyLang(true); };
+      resetChat();
+      document.getElementById('clearBtn').onclick = resetChat;
 
       async function ask(raw) {
         var q = String(raw || '').trim();
@@ -245,12 +194,12 @@
         addBubble('user', q);
         inp.value = '';
         sendBtn.disabled = true;
-        var wait = addBubble('assistant', COPY[lang].thinking);
+        var wait = addBubble('assistant', 'පිළිතුර සකසමින්...');
         try {
           var r = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: 'chat', replyLang: lang, messages: history })
+            body: JSON.stringify({ mode: 'chat', messages: history })
           });
           var j = await r.json();
           if (!r.ok) throw new Error(j.error || 'Error');
