@@ -4,6 +4,7 @@
   "private": true,
   "engines": { "node": "22.x" },
   "dependencies": {
+    "@google/genai": "^3.6.1",
     "bcryptjs": "2.4.3",
     "jsonwebtoken": "9.0.2"
   }
