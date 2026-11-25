@@ -33,3 +33,238 @@
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.body.classList.remove('side-open'); });
 })();
+
+
+/* MCG ICT Grid - Floating Dual-Language AI Student Helper */
+(function () {
+  function mountMcgAiHelper() {
+    if (document.getElementById('mcg-ai-helper')) return;
+
+    var lang = 'si';
+    try {
+      if (localStorage.getItem('lms_lang') === 'en') lang = 'en';
+    } catch (e) {}
+
+    var COPY = {
+      si: {
+        fab: 'AI සහායක',
+        title: 'Grid Helper',
+        sub: 'සිංහල සහායක',
+        toggle: 'EN',
+        placeholder: 'ඔබේ ගැටළුව ලියන්න...',
+        thinking: 'පිළිතුර සකසමින්...',
+        welcome: 'ආයුබෝවන්! මම MCG ICT Grid AI සහායක. Homework, Quizzes, ලකුණු හෝ ICT පාඩම් ගැන ඕනෑම දෙයක් මගෙන් අහන්න.',
+        starters: [
+          'Homework එකට photo දාන්නේ කොහොමද?',
+          'Quiz ලකුණු බලන්නේ කොහොමද?',
+          'Class Chat එකේ links යවන්න බැරි ඇයි?'
+        ]
+      },
+      en: {
+        fab: 'AI Helper',
+        title: 'Grid Helper',
+        sub: 'English Mode',
+        toggle: 'සිං',
+        placeholder: 'Ask a question...',
+        thinking: 'Drafting reply...',
+        welcome: 'Hello! I am the MCG ICT Grid AI Helper. Ask me anything about homework, quizzes, marks, or ICT lessons.',
+        starters: [
+          'How do I upload homework photos?',
+          'Where do I see my quiz marks?',
+          'Why are links blocked in Class Chat?'
+        ]
+      }
+    };
+
+    var st = document.createElement('style');
+    st.textContent = [
+      '#mcg-ai-helper{position:fixed;right:18px;bottom:18px;z-index:75;display:flex;flex-direction:column;align-items:flex-end;gap:10px;font-family:"Poppins","Noto Sans Sinhala",system-ui,sans-serif;}',
+      '#mcg-ai-box{display:none;width:348px;max-width:calc(100vw - 32px);height:460px;max-height:calc(100vh - 96px);background:var(--card,#fff);color:var(--tx,#121214);border:1px solid var(--line,#e2e2dc);border-radius:var(--r,14px);box-shadow:var(--sh2,0 12px 30px rgba(0,0,0,.18));flex-direction:column;overflow:hidden;animation:pop .22s ease both;}',
+      '#mcg-ai-box.open{display:flex;}',
+      '.mcg-ai-head{padding:12px 14px;background:var(--y,#ffc900);color:#111;display:flex;align-items:center;justify-content:space-between;gap:8px;}',
+      '.mcg-ai-id{display:flex;align-items:center;gap:9px;min-width:0;}',
+      '.mcg-ai-crest{width:30px;height:30px;border-radius:50%;background:#fff;object-fit:contain;padding:2px;flex:none;}',
+      '.mcg-ai-ttl{font-weight:700;font-size:13.5px;line-height:1.2;}',
+      '.mcg-ai-sub{font-size:11px;opacity:.78;font-weight:600;}',
+      '.mcg-ai-acts{display:flex;align-items:center;gap:6px;flex:none;}',
+      '.mcg-ai-hbtn{background:rgba(17,17,17,.12);border:0;color:#111;height:28px;padding:0 9px;border-radius:8px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}',
+      '.mcg-ai-hbtn:hover{background:rgba(17,17,17,.2);}',
+      '.mcg-ai-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg,#f5f5f2);}',
+      '.mcg-ai-msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}',
+      '.mcg-ai-msg.bot{align-self:flex-start;background:var(--card,#fff);color:var(--tx,#121214);border:1px solid var(--line,#e2e2dc);}',
+      '.mcg-ai-msg.usr{align-self:flex-end;background:var(--y,#ffc900);color:#111;font-weight:500;}',
+      '.mcg-ai-chips{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;background:var(--card,#fff);border-top:1px solid var(--line,#e2e2dc);}',
+      '.mcg-ai-chip{font:inherit;font-size:11.5px;padding:5px 10px;border-radius:9px;border:1px solid var(--line,#e2e2dc);background:var(--bg2,#ecece7);color:var(--tx,#121214);cursor:pointer;text-align:left;}',
+      '.mcg-ai-chip:hover{border-color:var(--yl,rgba(255,201,0,.4));background:var(--yt,rgba(255,201,0,.14));}',
+      '.mcg-ai-form{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line,#e2e2dc);background:var(--card,#fff);}',
+      '.mcg-ai-inp{flex:1;padding:9px 12px;border:1px solid var(--line,#e2e2dc);border-radius:10px;font:inherit;font-size:13px;background:var(--field,#fff);color:var(--tx,#121214);}',
+      '.mcg-ai-inp:focus{outline:none;border-color:var(--y,#ffc900);}',
+      '#mcg-ai-fab{border-radius:14px;box-shadow:var(--sh2,0 8px 24px rgba(0,0,0,.18));}'
+    ].join('');
+    document.head.appendChild(st);
+
+    var wrap = document.createElement('div');
+    wrap.id = 'mcg-ai-helper';
+
+    var box = document.createElement('div');
+    box.id = 'mcg-ai-box';
+
+    var head = document.createElement('div');
+    head.className = 'mcg-ai-head';
+
+    var idBox = document.createElement('div');
+    idBox.className = 'mcg-ai-id';
+    var img = document.createElement('img');
+    img.className = 'mcg-ai-crest';
+    img.src = 'logos/favicon.svg';
+    img.alt = '';
+    img.onerror = function () { img.remove(); };
+    var titleWrap = document.createElement('div');
+    var ttl = document.createElement('div');
+    ttl.className = 'mcg-ai-ttl';
+    var sub = document.createElement('div');
+    sub.className = 'mcg-ai-sub';
+    titleWrap.appendChild(ttl);
+    titleWrap.appendChild(sub);
+    idBox.appendChild(img);
+    idBox.appendChild(titleWrap);
+
+    var acts = document.createElement('div');
+    acts.className = 'mcg-ai-acts';
+    var langBtn = document.createElement('button');
+    langBtn.type = 'button';
+    langBtn.className = 'mcg-ai-hbtn';
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'mcg-ai-hbtn';
+    closeBtn.setAttribute('aria-label', 'Close');
+    var closeIcon = document.createElement('i');
+    closeIcon.className = 'fa-solid fa-xmark';
+    closeBtn.appendChild(closeIcon);
+    acts.appendChild(langBtn);
+    acts.appendChild(closeBtn);
+    head.appendChild(idBox);
+    head.appendChild(acts);
+
+    var msgs = document.createElement('div');
+    msgs.className = 'mcg-ai-msgs';
+    var chips = document.createElement('div');
+    chips.className = 'mcg-ai-chips';
+
+    var form = document.createElement('form');
+    form.className = 'mcg-ai-form';
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'mcg-ai-inp';
+    var sendBtn = document.createElement('button');
+    sendBtn.type = 'submit';
+    sendBtn.className = 'btn sm';
+    sendBtn.setAttribute('aria-label', 'Send');
+    var sendIcon = document.createElement('i');
+    sendIcon.className = 'fa-solid fa-paper-plane';
+    sendBtn.appendChild(sendIcon);
+    form.appendChild(inp);
+    form.appendChild(sendBtn);
+
+    box.appendChild(head);
+    box.appendChild(msgs);
+    box.appendChild(chips);
+    box.appendChild(form);
+
+    var fab = document.createElement('button');
+    fab.type = 'button';
+    fab.id = 'mcg-ai-fab';
+    fab.className = 'btn';
+    var fabIcon = document.createElement('i');
+    fabIcon.className = 'fa-solid fa-robot';
+    var fabText = document.createElement('span');
+    fab.appendChild(fabIcon);
+    fab.appendChild(fabText);
+
+    wrap.appendChild(box);
+    wrap.appendChild(fab);
+    document.body.appendChild(wrap);
+
+    var history = [];
+
+    function addBubble(role, text) {
+      var b = document.createElement('div');
+      b.className = 'mcg-ai-msg ' + (role === 'user' ? 'usr' : 'bot');
+      b.textContent = text;
+      msgs.appendChild(b);
+      msgs.scrollTop = msgs.scrollHeight;
+      return b;
+    }
+
+    function applyLang(reset) {
+      var c = COPY[lang];
+      fabText.textContent = c.fab;
+      ttl.textContent = c.title;
+      sub.textContent = c.sub;
+      langBtn.textContent = c.toggle;
+      inp.placeholder = c.placeholder;
+
+      if (reset || history.length === 0) {
+        while (msgs.firstChild) msgs.removeChild(msgs.firstChild);
+        history = [{ role: 'assistant', text: c.welcome }];
+        addBubble('assistant', c.welcome);
+        chips.style.display = 'flex';
+      }
+
+      while (chips.firstChild) chips.removeChild(chips.firstChild);
+      c.starters.forEach(function (q) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'mcg-ai-chip';
+        chip.textContent = q;
+        chip.onclick = function () { ask(q); };
+        chips.appendChild(chip);
+      });
+    }
+
+    applyLang(true);
+
+    langBtn.onclick = function () {
+      lang = lang === 'si' ? 'en' : 'si';
+      applyLang(history.length <= 1);
+    };
+
+    async function ask(raw) {
+      var q = String(raw || '').trim();
+      if (!q || sendBtn.disabled) return;
+      chips.style.display = 'none';
+      history.push({ role: 'user', text: q });
+      addBubble('user', q);
+      inp.value = '';
+      sendBtn.disabled = true;
+      var wait = addBubble('assistant', COPY[lang].thinking);
+
+      try {
+        var r = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'chat', replyLang: lang, messages: history })
+        });
+        var j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'Error');
+        wait.textContent = j.reply;
+        history.push({ role: 'assistant', text: j.reply });
+      } catch (e) {
+        wait.textContent = e.message || 'Connection error';
+      } finally {
+        sendBtn.disabled = false;
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+    }
+
+    fab.onclick = function () { box.classList.toggle('open'); };
+    closeBtn.onclick = function () { box.classList.remove('open'); };
+    form.onsubmit = function (e) { e.preventDefault(); ask(inp.value); };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountMcgAiHelper);
+  } else {
+    mountMcgAiHelper();
+  }
+})();
